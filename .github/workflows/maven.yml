@@ -3,15 +3,15 @@
 
 name: Java CI with Maven
 
-env:
-  TEST_TYPE_FAST: fast-test
-  TEST_TYPE_SLOW: slow-test
-
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+
+env:
+  TEST_TYPE_FAST: fast-test
+  TEST_TYPE_SLOW: slow-test
 
 jobs:
   tests:
@@ -23,12 +23,10 @@ jobs:
         include:
           # includes the value of the rebase variable depending on the test type of the matrix
           # includes the dependency between the 2 generated jobs to ensure sequential runs
-          - test-type: 'fast-test'
+          - test-type: ${{ env.TEST_TYPE_FAST }}
             rebase: false
-            needs: ''
-          - test-type: 'fast-test,slow-test'
-            rebase: true
-            needs: 'fast-test'
+#          - test-type: 'fast-test,slow-test'
+#            rebase: true
 #    needs: ${{ matrix.needs }} => needs does not support matrix
     steps:
       - uses: actions/checkout@v2
@@ -48,4 +46,6 @@ jobs:
 #          git checkout -b main origin/main
 #          git rebase main || git rebase --abort
       - name: Run tests with Maven
-        run: mvn -B test -Dgroups=${{ matrix.test-type }}
+        run: |
+          echo ${{ matrix.test-type }}
+          mvn -B test -Dgroups=${{ matrix.test-type }}
