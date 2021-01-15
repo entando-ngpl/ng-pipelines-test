@@ -16,11 +16,9 @@ on:
     types:
       - submitted
 
-  # Try merging a pull request a label is added
-  label:
-    types:
-      - created
-      - edited
+  # Try merging a pull request when a label is added
+  pull_request:
+    types: [ labeled ]
 
 jobs:
 
@@ -29,15 +27,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Logs"
-        uses: hmarr/debug-action
-#      - name: "Checkout"
-#        uses: actions/checkout@v2
-#      - name: "Merge"
-#        uses: reitermarkus/automerge@v1
-#        with:
-#          token: ${{ secrets.MERGE_PAL_TOKEN }}
-##          merge-method: merge
-#          do-not-merge-labels: never-merge
-##          required-labels: automerge
-##          pull-request: ${{ github.event.inputs.pull-request }}
-##          dry-run: true
+        uses: hmarr/debug-action@v1.0.0
+
+      - name: "Checkout"
+        uses: actions/checkout@v2
+      - name: "Merge"
+        uses: reitermarkus/automerge@v1
+        with:
+          token: ${{ secrets.MERGE_PAL_TOKEN }}
+#          merge-method: merge
+          do-not-merge-labels: never-merge
+#          required-labels: automerge
+#          pull-request: ${{ github.event.inputs.pull-request }}
+#          dry-run: true
