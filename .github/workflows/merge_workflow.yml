@@ -29,7 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Logs"
-        uses: hmarr/debug-action
+        uses: hmarr/debug-action@v1.0.0
+
 #      - name: "Checkout"
 #        uses: actions/checkout@v2
 #      - name: "Merge"
