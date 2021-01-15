@@ -10,4 +10,3 @@ public class KarateDojo {
         return "Never Dies";
     }
 }
-
