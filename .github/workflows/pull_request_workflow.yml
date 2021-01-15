@@ -32,26 +32,26 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2
-      - name: Set up JDK 1.1
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - name: Rebase
-        if: ${{ matrix.rebase }}
-        run: |
-          git fetch
-          git checkout main
-          git rebase main || git rebase --abort
-#          # rebase on main branch
-#          exists=`git show-ref refs/heads/main`
-#          if [ -n "$exists" ]; then
-#            echo 'branch exists!'
-#          fi
+#      - name: Set up JDK 1.1
+#        uses: actions/setup-java@v1
+#        with:
+#          java-version: 11
+#      - name: Rebase
+#        if: ${{ matrix.rebase }}
+#        run: |
 #          git fetch
-#          git checkout -b main origin/main
+#          git checkout main
 #          git rebase main || git rebase --abort
-      - name: Run tests with Maven
-        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
+##          # rebase on main branch
+##          exists=`git show-ref refs/heads/main`
+##          if [ -n "$exists" ]; then
+##            echo 'branch exists!'
+##          fi
+##          git fetch
+##          git checkout -b main origin/main
+##          git rebase main || git rebase --abort
+#      - name: Run tests with Maven
+#        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
 
 #  automerge:
 #    if: github.event.review.state == 'approved' || !github.event.review
