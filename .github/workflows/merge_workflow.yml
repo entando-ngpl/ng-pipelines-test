@@ -29,6 +29,7 @@ jobs:
       - name: "Logs"
         uses: hmarr/debug-action@v1.0.0
 
+
       - name: "Checkout"
         uses: actions/checkout@v2
       - name: "Merge"
