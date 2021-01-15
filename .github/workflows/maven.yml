@@ -35,6 +35,7 @@ jobs:
         if: ${{ matrix.rebase }}
         run: |
           # rebase on main branch
+          git fetch
           git checkout -b main origin/main
           git rebase main || git rebase --abort
       - name: Run tests with Maven
