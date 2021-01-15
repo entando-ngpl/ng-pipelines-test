@@ -52,29 +52,3 @@ jobs:
 ##          git rebase main || git rebase --abort
 #      - name: Run tests with Maven
 #        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
-
-#  automerge:
-#    if: github.event.review.state == 'approved' || !github.event.review
-#    needs: tests
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: reitermarkus/automerge@v1
-#        with:
-#          token: ${{ secrets.MERGE_PAL_TOKEN }}
-##          merge-method: merge
-#          do-not-merge-labels: never-merge
-##          required-labels: automerge
-##          pull-request: ${{ github.event.inputs.pull-request }}
-#          dry-run: true
-
-
-#  merge:
-#    needs:
-#      - 'tests'
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v1
-#
-#      - uses: maxkomarychev/merge-pal-action@v0.5.1
-#        with:
-#          token: ${{ secrets.MERGE_PAL_TOKEN }}

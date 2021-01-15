@@ -25,17 +25,19 @@ on:
 jobs:
 
   merge:
-    if: github.event.review.state == 'approved' || ( ! github.event.review && github.event.label.value == 'approved' )
+#    if: github.event.review.state == 'approved' || ( ! github.event.review && github.event.label.value == 'approved' )
     runs-on: ubuntu-latest
     steps:
-      - name: "Checkout"
-        uses: actions/checkout@v2
-      - name: "Merge"
-        uses: reitermarkus/automerge@v1
-        with:
-          token: ${{ secrets.MERGE_PAL_TOKEN }}
-#          merge-method: merge
-          do-not-merge-labels: never-merge
-#          required-labels: automerge
-#          pull-request: ${{ github.event.inputs.pull-request }}
-#          dry-run: true
+      - name: "Logs"
+        uses: hmarr/debug-action
+#      - name: "Checkout"
+#        uses: actions/checkout@v2
+#      - name: "Merge"
+#        uses: reitermarkus/automerge@v1
+#        with:
+#          token: ${{ secrets.MERGE_PAL_TOKEN }}
+##          merge-method: merge
+#          do-not-merge-labels: never-merge
+##          required-labels: automerge
+##          pull-request: ${{ github.event.inputs.pull-request }}
+##          dry-run: true
