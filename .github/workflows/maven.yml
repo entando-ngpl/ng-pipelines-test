@@ -4,8 +4,8 @@
 name: Java CI with Maven
 
 env:
-  TEST_TYPE_FAST: 'fast-test'
-  TEST_TYPE_SLOW: 'slow-test'
+  TEST_TYPE_FAST: fast-test
+  TEST_TYPE_SLOW: slow-test
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
     strategy:
       max-parallel: 1 # ensure the sequential running of the spawned jobs
       matrix:
-        test-type: [ '${{ env.TEST_TYPE_FAST }}' , '${{ env.TEST_TYPE_FAST }},${{ env.TEST_TYPE_SLOW }}' ] # order matters: spawned jobs are execute as received in the array
+        test-type: [ ${{ env.TEST_TYPE_FAST }} ] # order matters: spawned jobs are execute as received in the array
         include:
           # includes the value of the rebase variable depending on the test type of the matrix
           # includes the dependency between the 2 generated jobs to ensure sequential runs
