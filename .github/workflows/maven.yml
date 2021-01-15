@@ -3,6 +3,10 @@
 
 name: Java CI with Maven
 
+env:
+  TEST_TYPE_FAST: 'fast-test'
+  TEST_TYPE_SLOW: 'slow-test'
+
 on:
   push:
     branches: [ main ]
@@ -13,9 +17,9 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 1
+      max-parallel: 1 # ensure the sequential running of the spawned jobs
       matrix:
-        test-type: ['fast-test', 'fast-test,slow-test']
+        test-type: [ ${{ env.TEST_TYPE_FAST }} , '${{ env.TEST_TYPE_FAST }},${{ env.TEST_TYPE_SLOW }}' ] # order matters: spawned jobs are execute as received in the array
         include:
           # includes the value of the rebase variable depending on the test type of the matrix
           # includes the dependency between the 2 generated jobs to ensure sequential runs
@@ -25,7 +29,7 @@ jobs:
           - test-type: 'fast-test,slow-test'
             rebase: true
             needs: 'fast-test'
-#    needs: ${{ matrix.needs }}
+#    needs: ${{ matrix.needs }} => needs does not support matrix
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 1.1
@@ -36,8 +40,12 @@ jobs:
         if: ${{ matrix.rebase }}
         run: |
           # rebase on main branch
-          git fetch
-          git checkout -b main origin/main
-          git rebase main || git rebase --abort
+          exists=`git show-ref refs/heads/main`
+          if [ -n "$exists" ]; then
+              echo 'branch exists!'
+          fi
+#          git fetch
+#          git checkout -b main origin/main
+#          git rebase main || git rebase --abort
       - name: Run tests with Maven
         run: mvn -B test -Dgroups=${{ matrix.test-type }}
