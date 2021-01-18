@@ -1,0 +1,23 @@
+# This workflow will prepare every thing required to proceed with a PR
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Preparation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [ main ]
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Guard file"
+        run: |
+#          if not present => create file
+#          else => update file
+          ls guard
+          echo "Guard file updated"
+      - name: "BOM update"
+        run: |
+          echo "BOM updated"
