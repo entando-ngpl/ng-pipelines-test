@@ -6,7 +6,7 @@ name: Preparation
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [ main ]
+#    branches: [ main ]
 
 jobs:
   prepare:
@@ -16,8 +16,8 @@ jobs:
         run: |
 #          if not present => create file
 #          else => update file
-          ls guard
-          echo "Guard file updated"
+#          ls guard
+          echo 'Guard file updated'
       - name: "BOM update"
         run: |
           echo "BOM updated"
