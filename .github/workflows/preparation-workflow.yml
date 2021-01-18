@@ -14,3 +14,9 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2
+      - name: "Guard file update"
+        run: |
+          ls
+          echo 'Guard file updated'
+      - name: "BOM update"
+        run: echo 'BOM updated'
