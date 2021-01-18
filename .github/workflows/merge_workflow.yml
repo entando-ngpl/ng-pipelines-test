@@ -26,9 +26,8 @@ jobs:
     if: github.event.review.state == 'approved' || ( ! github.event.review && github.event.label.name == 'approved' )
     runs-on: ubuntu-latest
     steps:
-      - name: "Logs"
-        uses: hmarr/debug-action@v1.0.0
-
+#      - name: "Logs"
+#        uses: hmarr/debug-action@v1.0.0
 
       - name: "Checkout"
         uses: actions/checkout@v2
