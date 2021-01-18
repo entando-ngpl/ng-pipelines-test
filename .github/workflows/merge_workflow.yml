@@ -1,8 +1,11 @@
-## This workflow will merge a pull request in the target branch
-## For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
-#
-#name: Merge
-#
+# This workflow will merge a pull request in the target branch
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Merge
+
+on:
+  push:
+    branches: [ no ]
 #on:
 ##  # Try merging pull requests belonging to a workflow run.
 ##  workflow_run:
@@ -19,24 +22,24 @@
 #  # Try merging a pull request when a label is added
 #  pull_request:
 #    types: [ labeled ]
-#
-#jobs:
-#
-#  merge:
-#    if: github.event.review.state == 'approved' || ( ! github.event.review && github.event.label.name == 'approved' )
-#    runs-on: ubuntu-latest
-#    steps:
-##      - name: "Logs"
-##        uses: hmarr/debug-action@v1.0.0
-#
-#      - name: "Checkout"
-#        uses: actions/checkout@v2
-#      - name: "Merge"
-#        uses: reitermarkus/automerge@v1
-#        with:
-#          token: ${{ secrets.MERGE_PAL_TOKEN }}
-##          merge-method: merge
-#          do-not-merge-labels: never-merge
-##          required-labels: automerge
-##          pull-request: ${{ github.event.inputs.pull-request }}
-##          dry-run: true
+
+jobs:
+
+  merge:
+    if: github.event.review.state == 'approved' || ( ! github.event.review && github.event.label.name == 'approved' )
+    runs-on: ubuntu-latest
+    steps:
+#      - name: "Logs"
+#        uses: hmarr/debug-action@v1.0.0
+
+      - name: "Checkout"
+        uses: actions/checkout@v2
+      - name: "Merge"
+        uses: reitermarkus/automerge@v1
+        with:
+          token: ${{ secrets.MERGE_PAL_TOKEN }}
+#          merge-method: merge
+          do-not-merge-labels: never-merge
+#          required-labels: automerge
+#          pull-request: ${{ github.event.inputs.pull-request }}
+#          dry-run: true
