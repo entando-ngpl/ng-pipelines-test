@@ -12,12 +12,14 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     steps:
-      - name: "Guard file"
-        run: |
-#          if not present => create file
-#          else => update file
-#          ls guard
-          echo 'Guard file updated'
-      - name: "BOM update"
-        run: |
-          echo "BOM updated"
+      - name: "Checkout"
+        uses: actions/checkout@v2
+#      - name: "Guard file"
+#        run: |
+##          if not present => create file
+##          else => update file
+##          ls guard
+#          echo 'Guard file updated'
+#      - name: "BOM update"
+#        run: |
+#          echo "BOM updated"
