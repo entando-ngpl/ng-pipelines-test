@@ -23,7 +23,7 @@ jobs:
           # ---- add existence check
           git add guard
           git commit guard -m 'guard file update'
-          git push
+          # git push
           echo 'Guard file updated'
       - name: "BOM update"
         run: echo 'BOM updated'

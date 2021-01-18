@@ -4,14 +4,13 @@
 name: Java CI with Maven
 
 on:
-  push:
-    branches: [ no ]
-#on:
-#  pull_request:
-#    branches: [ main ]
+  workflow_run:
+    workflows: [ "Preparation" ]
+    branches: [ main ]
+    types:
+      - completed
 
 jobs:
-  ### TESTS JOBS
   tests:
     runs-on: ubuntu-latest
     strategy:
