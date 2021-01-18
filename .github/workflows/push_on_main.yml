@@ -16,7 +16,7 @@ jobs:
       - name: "Check if rebase is required"
         run: |
           currBranch="${GITHUB_REF#refs/heads/}"
-          hash1=$(git show-ref --heads -s master)
-          hash2=$(git merge-base master "${currBranch}")
+          hash1=$(git show-ref --heads -s main)
+          hash2=$(git merge-base main "${currBranch}")
           [ "${hash1}" = "${hash2}" ] && echo "OK" || echo "Rebase is required"
-
+          return 1
