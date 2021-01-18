@@ -1,22 +1,21 @@
-# This workflow will build a Java project with Maven
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
-
-name: Java CI with Maven
-
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  checks:
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v2
-      - name: "Check if rebase is required"
-        run: |
-          currBranch="${GITHUB_REF#refs/heads/}"
-          hash1=$(git show-ref --heads -s main)
-          hash2=$(git merge-base main "${currBranch}")
-          [ "${hash1}" = "${hash2}" ] && echo "OK" || echo "Rebase is required"
-          return 1
+## This workflow will build a Java project with Maven
+## For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+#
+#name: Java CI with Maven
+#
+#on:
+#  push:
+#    branches: [ main ]
+#
+#jobs:
+#  checks:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: "Checkout"
+#        uses: actions/checkout@v2
+#      - name: "Check if rebase is required"
+#        run: |
+#          currBranch="${GITHUB_REF#refs/heads/}"
+#          hash1=$(git show-ref --heads -s main)
+#          hash2=$(git merge-base main "${currBranch}")
+#          [ "${hash1}" = "${hash2}" ] && echo "OK" || echo "Rebase is required"
