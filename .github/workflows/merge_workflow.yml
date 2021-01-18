@@ -23,7 +23,7 @@ on:
 jobs:
 
   merge:
-#    if: github.event.review.state == 'approved' || ( ! github.event.review && github.event.label.value == 'approved' )
+    if: github.event.review.state == 'approved' || ( ! github.event.review && github.event.label.name == 'approved' )
     runs-on: ubuntu-latest
     steps:
       - name: "Logs"
