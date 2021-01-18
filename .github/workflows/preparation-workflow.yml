@@ -16,7 +16,22 @@ jobs:
         uses: actions/checkout@v2
       - name: "Guard file update"
         run: |
-          ls
+          echo "test 1"
+          git config --global user.email "cicd@entando.com"
+          git config --global user.name "firegloves"
+          echo "test 2"
+          echo "${GITHUB_REF}"
+          hash=$(md5sum<<<"${GITHUB_REF}")
+          echo "test 3"
+          echo "$hash" > guard
+          echo "test 4"
+          # ---- add existence check
+          echo "test 5"
+          git add guard
+          echo "test 6"
+          git commit guard -m 'guard file update'
+          echo "test 7"
+          git push
           echo 'Guard file updated'
       - name: "BOM update"
         run: echo 'BOM updated'
