@@ -5,7 +5,7 @@ name: Preparation
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+#    types: [opened, synchronize, reopened]
 #    branches: [ main ]
 
 jobs:
@@ -14,27 +14,16 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2
-      - name: reattach HEAD to Head Ref
-        run: git checkout "$(echo ${{ github.head_ref }} | sed -E 's|refs/[a-zA-Z]+/||')"
-        if: github.head_ref != ''
       - name: "Guard file update"
         run: |
-          echo "test 1"
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
-          echo "test 2"
           echo "${GITHUB_REF}"
           hash=$(md5sum<<<"${GITHUB_REF}")
-          echo "test 3"
           echo "$hash" > guard
-          echo "test 4"
-          less guard
           # ---- add existence check
-          echo "test 5"
           git add guard
-          echo "test 6"
           git commit guard -m 'guard file update'
-          echo "test 7"
           git push
           echo 'Guard file updated'
       - name: "BOM update"
