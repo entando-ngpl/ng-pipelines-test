@@ -5,8 +5,8 @@ name: Preparation
 
 on:
   pull_request:
-#    types: [opened, synchronize, reopened]
-#    branches: [ main ]
+    types: [opened, synchronize, reopened]
+    branches: [ main ]
 
 jobs:
   prepare:
@@ -18,7 +18,6 @@ jobs:
         run: |
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
-          echo "${GITHUB_REF}"
           hash=$(md5sum<<<"${GITHUB_REF}")
           echo "$hash" > guard
           # ---- add existence check
