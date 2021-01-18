@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@v2
       - name: "Check if rebase is required"
         run: |
-          echo "CURRENT BRANCH ${currBranch}"
+          echo "CURRENT BRANCH ${GITHUB_HEAD_REF}"
           hash1=$(git show-ref --heads -s main)
           hash2=$(git merge-base main "${GITHUB_HEAD_REF}")
           [ "${hash1}" = "${hash2}" ] && echo "OK" || echo "Rebase is required"
