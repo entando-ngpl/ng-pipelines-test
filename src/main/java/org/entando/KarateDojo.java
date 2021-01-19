@@ -11,4 +11,8 @@ public class KarateDojo {
     public String kobraKai() {
         return "Never Dies";
     }
+
+    public String eagleFang() {
+        return "Eagles don't have fangs";
+    }
 }
