@@ -27,13 +27,15 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
       - name: Checkout
+        env:
+          TOKEN: ${{ secrets.TOKEN }}
         run: |
           echo "######### $CLONE_URL"
           echo "######### $BRANCH_NAME"
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
           git config pull.rebase false
-          git clone https://${{ secrets.TOKEN }}:x-oauth-basic@github.com/entando-ngpl/ng-pipelines-test.git repo_folder
+          git clone "https://$TOKEN:x-oauth-basic@github.com/entando-ngpl/ng-pipelines-test.git" repo_folder
           cd repo_folder
           git checkout "$BRANCH_NAME"
           git pull
