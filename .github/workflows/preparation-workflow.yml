@@ -15,52 +15,31 @@ jobs:
       BRANCH_NAME: ${{ github.head_ref }}
     runs-on: ubuntu-latest
     steps:
-#      - name: "Checkout"
-#        uses: actions/checkout@v2
-#        with:
-#          ref: ${{ github.event.pull_request.head.sha }}
-#      - uses: nelonoel/branch-name@v1.0.1
-          # Use branch name for whatever purpose
-#      - run: echo ${BRANCH_NAME}
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Checkout
+#      - name: Dump GitHub context
+#        env:
+#          GITHUB_CONTEXT: ${{ toJson(github) }}
+#        run: echo "$GITHUB_CONTEXT"
+      - name: "Checkout"
         env:
           TOKEN_SECRET: ${{ secrets.TOKEN }}
         run: |
-          echo "######### $CLONE_URL"
-          echo "######### $BRANCH_NAME"
+          ### BUILD AND USE THE RIGHT URL
           git clone "https://$TOKEN_SECRET:x-oauth-basic@github.com/entando-ngpl/ng-pipelines-test.git" repo_folder
           cd repo_folder
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
           git config pull.rebase false
-          echo "########################## IN REPO"
-          echo "##########################"
-          echo "##########################"
           git checkout "$BRANCH_NAME"
-          echo "########################## PRE PULL"
-          echo "##########################"
-          echo "##########################"
           git pull
-          echo "########################## PRE STATUS"
-          echo "##########################"
-          echo "##########################"
-          git status || true
       - name: "Guard file update"
         run: |
           cd repo_folder
-          git pull
           hash=$(sha256sum<<<"${GITHUB_REF}")
           echo "$hash" > guard
           # ---- add existence check
           git add guard
           git commit guard -m 'guard file update'
           git push --set-upstream origin $BRANCH_NAME
-          #          echo "######### branch ${BRANCH_NAME}"
-          # git push origin HEAD:${BRANCH_NAME}
           echo 'Guard file updated'
       - name: "BOM update"
         run: echo 'BOM updated'
