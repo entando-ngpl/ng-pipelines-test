@@ -21,13 +21,9 @@ jobs:
 #      - run: echo ${BRANCH_NAME}
       - name: Checkout
         run: |
-          echo "XXXXXXXXXXXXXXXXXX"
-          echo "XXXXXXXXXXXXXXXXXX"
-          echo "XXXXXXXXXXXXXXXXXX"
-          echo "XXXXXXXXXXXXXXXXXX"
           ls -la
           pwd
-          git status
+          git status || true
           git clone ${github.pull_request.head.repo.clone_url} repo_folder
           cd repo_folder
           echo "in repo folder"
