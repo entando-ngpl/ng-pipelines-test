@@ -26,13 +26,8 @@ jobs:
       - name: Checkout
         env:
           CLONE_URL: ${{ github.repositoryUrl }}
-          CLONE_URL_JSON: ${{ toJson(github.repositoryUrl) }}
-          BRANCH_NAME: ${{ github.head.ref }}
+          BRANCH_NAME: ${{ github.head_ref }}
         run: |
-          echo "1 $CLONE_URL"
-          echo "2 $CLONE_URL_JSON"
-          echo "3 ${{ github.repositoryUrl }}"
-          echo "4 BRANCH_NAME $BRANCH_NAME"
           set -x
           git clone "$CLONE_URL" repo_folder
           cd repo_folder
@@ -40,6 +35,7 @@ jobs:
           pwd
           ls -la
           git checkout -b "$BRANCH_NAME"
+          git status || true
       - name: "Guard file update"
         run: |
           git config --global user.email "cicd@entando.com"
