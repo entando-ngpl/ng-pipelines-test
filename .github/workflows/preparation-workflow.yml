@@ -21,6 +21,10 @@ jobs:
 #      - run: echo ${BRANCH_NAME}
       - name: Checkout
         run: |
+          echo "XXXXXXXXXXXXXXXXXX"
+          echo "XXXXXXXXXXXXXXXXXX"
+          echo "XXXXXXXXXXXXXXXXXX"
+          echo "XXXXXXXXXXXXXXXXXX"
           ls -la
           pwd
           git status
