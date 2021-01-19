@@ -39,6 +39,7 @@ jobs:
         run: |
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
+          git pull
           cd repo_folder
           hash=$(sha256sum<<<"${GITHUB_REF}")
           echo "$hash" > guard
