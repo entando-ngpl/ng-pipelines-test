@@ -35,10 +35,13 @@ jobs:
         run: |
           cd repo_folder
           hash=$(sha256sum<<<"${GITHUB_REF}")
+          echo "########## $hash"
           echo "$hash" > guard
           # ---- add existence check
           git add guard
+          echo "####### PRE COMMIT"
           git commit guard -m 'guard file update'
+          echo "####### PRE PUSH"
           git push --set-upstream origin $BRANCH_NAME
           echo 'Guard file updated'
       - name: "BOM update"
