@@ -6,7 +6,6 @@ name: Java CI with Maven
 on:
   workflow_run:
     workflows: [ "Preparation" ]
-    branches: [ main ]
     types:
       - completed
 
