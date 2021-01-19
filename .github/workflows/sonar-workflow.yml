@@ -4,13 +4,13 @@
 name: Sonar Checks
 
 on:
-  workflow_run:
-    workflows: [ "no" ]
+  pull_request:
     types:
-      - completed
+      - labeled
 
 jobs:
   sonar:
+    if: github.event.label.name == 'prepared'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

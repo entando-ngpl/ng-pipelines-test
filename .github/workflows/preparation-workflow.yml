@@ -43,3 +43,9 @@ jobs:
           echo 'Guard file updated'
       - name: "BOM update"
         run: echo 'BOM updated'
+      - name: "Add label prepared"
+        uses: buildsville/add-remove-label@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          label: prepared
+          type: add
