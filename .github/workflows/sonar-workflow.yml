@@ -10,7 +10,7 @@ on:
 
 jobs:
   sonar:
-    if: github.event.label.name == 'prepared'
+#    if: github.event.label.name == 'prepared'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
