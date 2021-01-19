@@ -35,9 +35,9 @@ jobs:
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
           git config pull.rebase false
-          git clone "https://$TOKEN:x-oauth-basic@github.com/entando-ngpl/ng-pipelines-test.git" repo_folder
+          git clone "https://${{TOKEN}}:x-oauth-basic@github.com/entando-ngpl/ng-pipelines-test.git" repo_folder
           cd repo_folder
-          git checkout "$BRANCH_NAME"
+          git checkout $BRANCH_NAME
           git pull
           git status || true
       - name: "Guard file update"
