@@ -14,16 +14,22 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2
-      - name: "Guard file update"
-        run: |
-          git config --global user.email "cicd@entando.com"
-          git config --global user.name "firegloves"
-          hash=$(md5sum<<<"${GITHUB_REF}")
-          echo "$hash" > guard
-          # ---- add existence check
-          git add guard
-          git commit guard -m 'guard file update'
-          # git push
-          echo 'Guard file updated'
+#      - name: "Guard file update"
+#        run: |
+##          git config --global user.email "cicd@entando.com"
+##          git config --global user.name "firegloves"
+##          hash=$(md5sum<<<"${GITHUB_REF}")
+##          echo "$hash" > guard
+##          # ---- add existence check
+##          git add guard
+##          git commit guard -m 'guard file update'
+#          # git push
+#          echo 'Guard file updated'
       - name: "BOM update"
         run: echo 'BOM updated'
+      - name: removelabel
+        uses: buildsville/add-remove-label@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          label: prepared
+          type: add
