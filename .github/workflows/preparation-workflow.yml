@@ -10,6 +10,9 @@ on:
 
 jobs:
   prepare:
+    env:
+      CLONE_URL: ${{ github.repositoryUrl }}
+      BRANCH_NAME: ${{ github.head_ref }}
     runs-on: ubuntu-latest
     steps:
 #      - name: "Checkout"
@@ -19,21 +22,17 @@ jobs:
 #      - uses: nelonoel/branch-name@v1.0.1
           # Use branch name for whatever purpose
 #      - run: echo ${BRANCH_NAME}
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
+#      - name: Dump GitHub context
+#        env:
+#          GITHUB_CONTEXT: ${{ toJson(github) }}
+#        run: echo "$GITHUB_CONTEXT"
       - name: Checkout
-        env:
-          CLONE_URL: ${{ github.repositoryUrl }}
-          BRANCH_NAME: ${{ github.head_ref }}
+#        env:
+#          CLONE_URL: ${{ github.repositoryUrl }}
+#          BRANCH_NAME: ${{ github.head_ref }}
         run: |
-          set -x
           git clone "$CLONE_URL" repo_folder
           cd repo_folder
-          echo "in repo folder"
-          pwd
-          ls -la
           git checkout -b "$BRANCH_NAME"
           git status || true
       - name: "Guard file update"
