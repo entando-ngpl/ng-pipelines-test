@@ -18,7 +18,10 @@ on:
 
 jobs:
   prepare:
-#    if: ${{ github.event.issue.pull_request }}
+    # true if
+    #   - pull request opened, synchronize, reopened
+    #   - issue_comment on pull request and comment == /retest
+    if: ${{ github.event.issue.pull_request }} && ( ${{ !github.event.comment }} || github.event.comment.body == "/retest")
     env:
       CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
       BRANCH_NAME: ${{ github.head_ref }}
