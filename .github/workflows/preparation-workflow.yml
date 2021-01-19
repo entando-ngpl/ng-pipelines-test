@@ -24,7 +24,11 @@ jobs:
           ls -la
           pwd
           git status
-          git clone ${github.pull_request.head.repo.clone_url}
+          git clone ${github.pull_request.head.repo.clone_url} repo_folder
+          cd repo_folder
+          echo "in repo folder"
+          pwd
+          ls -la
           git checkout -b ${github.pull_request.head.ref}
       - name: "Guard file update"
         run: |
