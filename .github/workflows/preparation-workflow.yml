@@ -27,13 +27,10 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
       - name: Checkout
-#        env:
-#          CLONE_URL: ${{ github.repositoryUrl }}
-#          BRANCH_NAME: ${{ github.head_ref }}
         run: |
           echo "######### $CLONE_URL"
           echo "######### $BRANCH_NAME"
-          git clone https://${{ secrets.TOKEN }}:x-oauth-basic@github.com/entando-ngpl/ng-pipelines-test.git
+          git clone https://${{ secrets.TOKEN }}:x-oauth-basic@github.com/entando-ngpl/ng-pipelines-test.git repo_folder
           cd repo_folder
           git checkout -b "$BRANCH_NAME"
           git status || true
@@ -48,7 +45,7 @@ jobs:
           git add guard
           git commit guard -m 'guard file update'
           git push
-#          echo "######### branch ${BRANCH_NAME}"
+          #          echo "######### branch ${BRANCH_NAME}"
           # git push origin HEAD:${BRANCH_NAME}
           echo 'Guard file updated'
       - name: "BOM update"
