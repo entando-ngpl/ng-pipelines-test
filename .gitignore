@@ -7,7 +7,7 @@ logs_36
 logs_43
 logs_144
 
-./idea
+./idea/**/*
 
 # User-specific stuff
 .idea/**/workspace.xml
