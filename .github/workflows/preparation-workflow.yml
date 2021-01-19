@@ -37,8 +37,17 @@ jobs:
           git config pull.rebase false
           git clone "https://$TOKEN_SECRET:x-oauth-basic@github.com/entando-ngpl/ng-pipelines-test.git" repo_folder
           cd repo_folder
+          echo "########################## IN REPO"
+          echo "##########################"
+          echo "##########################"
           git checkout "$BRANCH_NAME"
+          echo "########################## PRE PULL"
+          echo "##########################"
+          echo "##########################"
           git pull
+          echo "########################## PRE STATUS"
+          echo "##########################"
+          echo "##########################"
           git status || true
       - name: "Guard file update"
         run: |
