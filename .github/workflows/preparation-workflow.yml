@@ -20,17 +20,20 @@ jobs:
           # Use branch name for whatever purpose
 #      - run: echo ${BRANCH_NAME}
       - name: Checkout
+        env:
+          CLONE_URL: ${{ github.pull_request.head.repo.clone_url }}
+          BRANCH_NAME: ${{ github.pull_request.head.ref }}
         run: |
           ls -la
           pwd
           set -x
           git status || true
-          git clone ${github.pull_request.head.repo.clone_url} repo_folder
+          git clone "$CLONE_URL" repo_folder
           cd repo_folder
           echo "in repo folder"
           pwd
           ls -la
-          git checkout -b ${github.pull_request.head.ref}
+          git checkout -b "$BRANCH_NAME"
       - name: "Guard file update"
         run: |
           git config --global user.email "cicd@entando.com"
