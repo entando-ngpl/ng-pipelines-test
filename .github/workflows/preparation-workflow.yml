@@ -14,16 +14,23 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: nelonoel/branch-name@v1.0.1
+          # Use branch name for whatever purpose
+#      - run: echo ${BRANCH_NAME}
       - name: "Guard file update"
         run: |
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
-          hash=$(md5sum<<<"${GITHUB_REF}")
+          hash=$(sha256sum<<<"${GITHUB_REF}")
           echo "$hash" > guard
           # ---- add existence check
           git add guard
           git commit guard -m 'guard file update'
           # git push
+          echo "branch ${BRANCH_NAME}"
+          git push origin HEAD:${BRANCH_NAME}
           echo 'Guard file updated'
       - name: "BOM update"
         run: echo 'BOM updated'
