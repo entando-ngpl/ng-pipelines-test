@@ -30,15 +30,17 @@ jobs:
         run: |
           echo "######### $CLONE_URL"
           echo "######### $BRANCH_NAME"
+          git config --global user.email "cicd@entando.com"
+          git config --global user.name "firegloves"
+          git config pull.rebase false
           git clone https://${{ secrets.TOKEN }}:x-oauth-basic@github.com/entando-ngpl/ng-pipelines-test.git repo_folder
           cd repo_folder
-          git checkout -b "$BRANCH_NAME"
+          git checkout "$BRANCH_NAME"
           git pull
           git status || true
       - name: "Guard file update"
         run: |
-          git config --global user.email "cicd@entando.com"
-          git config --global user.name "firegloves"
+
           git pull
           cd repo_folder
           hash=$(sha256sum<<<"${GITHUB_REF}")
