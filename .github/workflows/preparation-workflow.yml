@@ -12,13 +12,20 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     steps:
-      - name: "Checkout"
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-      - uses: nelonoel/branch-name@v1.0.1
+#      - name: "Checkout"
+#        uses: actions/checkout@v2
+#        with:
+#          ref: ${{ github.event.pull_request.head.sha }}
+#      - uses: nelonoel/branch-name@v1.0.1
           # Use branch name for whatever purpose
 #      - run: echo ${BRANCH_NAME}
+      - name: Checkout
+        run: |
+          ls -la
+          pwd
+          git status
+          git clone ${github.pull_request.head.repo.clone_url}
+          git checkout -b ${github.pull_request.head.ref}
       - name: "Guard file update"
         run: |
           git config --global user.email "cicd@entando.com"
