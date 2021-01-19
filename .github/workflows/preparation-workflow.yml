@@ -10,20 +10,43 @@ on:
 
 jobs:
   prepare:
+    env:
+      CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
+#      REPOSITORY_URL: ${{ github.repository }} #" entando-ngpl/ng-pipelines-test",
+      BRANCH_NAME: ${{ github.head_ref }}
     runs-on: ubuntu-latest
     steps:
+#      - name: Dump GitHub context
+#        env:
+#          GITHUB_CONTEXT: ${{ toJson(github) }}
+#        run: echo "$GITHUB_CONTEXT"
       - name: "Checkout"
-        uses: actions/checkout@v2
-      - name: "Guard file update"
+        env:
+          TOKEN_SECRET: ${{ secrets.TOKEN }}
         run: |
+          ### BUILD AND USE THE RIGHT URL
+          authUrl=$(echo "$CLONE_URL" | sed "s|://|://$TOKEN_SECRET@|")
+          echo "################ $authUrl"
+          git clone "$authUrl" repo_folder
+          cd repo_folder
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
-          hash=$(md5sum<<<"${GITHUB_REF}")
+          git config pull.rebase false
+          git checkout "$BRANCH_NAME"
+          git pull
+      - name: "Guard file update"
+        if: github.pull_request.state == 'open'
+        run: |
+          cd repo_folder
+          hash=$(sha256sum<<<"${GITHUB_REF}")
+          echo "########## $hash"
           echo "$hash" > guard
           # ---- add existence check
           git add guard
+          echo "####### PRE COMMIT"
           git commit guard -m 'guard file update'
-          # git push
+          echo "####### PRE PUSH"
+          git push --set-upstream origin $BRANCH_NAME
           echo 'Guard file updated'
       - name: "BOM update"
         run: echo 'BOM updated'
