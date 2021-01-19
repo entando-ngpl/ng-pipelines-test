@@ -4,13 +4,13 @@
 name: OWASP Checks
 
 on:
-  workflow_run:
-    workflows: [ "no" ]
+  pull_request:
     types:
-      - completed
+      - labeled
 
 jobs:
   owasp:
+    if: github.event.label.name == 'prepared'
     runs-on: ubuntu-latest
     steps:
       - name: "OWASP checks"
