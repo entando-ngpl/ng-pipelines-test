@@ -23,6 +23,7 @@ jobs:
         run: |
           ls -la
           pwd
+          set -x
           git status || true
           git clone ${github.pull_request.head.repo.clone_url} repo_folder
           cd repo_folder
