@@ -38,8 +38,6 @@ jobs:
           git checkout -b "$BRANCH_NAME"
           git status || true
       - name: "Guard file update"
-        with:
-          token: ${{ secrets.MERGE_PAL_TOKEN }}
         run: |
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
