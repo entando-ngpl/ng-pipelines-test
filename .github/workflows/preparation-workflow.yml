@@ -5,9 +5,9 @@ name: Preparation
 
 on:
   push:
-#  pull_request:
-#    types: [opened, synchronize, reopened]
-    branches: [ no ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [ main ]
 
 jobs:
   prepare:
