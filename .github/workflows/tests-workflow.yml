@@ -4,13 +4,12 @@
 name: Automated Tests
 
 on:
-  workflow_run:
-    workflows: [ "no" ]
+  pull_request:
     types:
-      - completed
-
+      - labeled
 jobs:
   tests:
+    if: github.event.label.name == 'prepared'
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1 # ensure the sequential running of the spawned jobs
