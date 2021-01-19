@@ -12,7 +12,6 @@ jobs:
   prepare:
     env:
       CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
-#      REPOSITORY_URL: ${{ github.repository }} #" entando-ngpl/ng-pipelines-test",
       BRANCH_NAME: ${{ github.head_ref }}
     runs-on: ubuntu-latest
     steps:
@@ -24,9 +23,7 @@ jobs:
         env:
           TOKEN_SECRET: ${{ secrets.TOKEN }}
         run: |
-          ### BUILD AND USE THE RIGHT URL
           authUrl=$(echo "$CLONE_URL" | sed "s|://|://$TOKEN_SECRET@|")
-          echo "################ $authUrl"
           git clone "$authUrl" repo_folder
           cd repo_folder
           git config --global user.email "cicd@entando.com"
@@ -39,13 +36,9 @@ jobs:
         run: |
           cd repo_folder
           hash=$(sha256sum<<<"${GITHUB_REF}")
-          echo "########## $hash"
           echo "$hash" > guard
-          # ---- add existence check
           git add guard
-          echo "####### PRE COMMIT"
           git commit guard -m 'guard file update'
-          echo "####### PRE PUSH"
           git push --set-upstream origin $BRANCH_NAME
           echo 'Guard file updated'
       - name: "BOM update"
