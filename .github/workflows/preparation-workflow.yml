@@ -11,7 +11,7 @@ on:
 jobs:
   prepare:
     env:
-      CLONE_URL: ${{ github.clone_url }}
+      CLONE_URL: ${{ github.event.base.clone_url }}
       BRANCH_NAME: ${{ github.head_ref }}
     runs-on: ubuntu-latest
     steps:
@@ -22,15 +22,16 @@ jobs:
 #      - uses: nelonoel/branch-name@v1.0.1
           # Use branch name for whatever purpose
 #      - run: echo ${BRANCH_NAME}
-#      - name: Dump GitHub context
-#        env:
-#          GITHUB_CONTEXT: ${{ toJson(github) }}
-#        run: echo "$GITHUB_CONTEXT"
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
       - name: Checkout
 #        env:
 #          CLONE_URL: ${{ github.repositoryUrl }}
 #          BRANCH_NAME: ${{ github.head_ref }}
         run: |
+          echo "######### $CLONE_URL"
           git clone "$CLONE_URL" repo_folder
           cd repo_folder
           git checkout -b "$BRANCH_NAME"
