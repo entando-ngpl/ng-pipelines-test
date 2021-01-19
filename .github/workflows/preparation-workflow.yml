@@ -11,7 +11,7 @@ on:
 jobs:
   prepare:
     env:
-      CLONE_URL: ${{ github.repositoryUrl }}
+      CLONE_URL: ${{ github.clone_url }}
       BRANCH_NAME: ${{ github.head_ref }}
     runs-on: ubuntu-latest
     steps:
@@ -46,7 +46,7 @@ jobs:
           git add guard
           git commit guard -m 'guard file update'
           # git push
-          echo "branch ${BRANCH_NAME}"
+          echo "######### branch ${BRANCH_NAME}"
           git push origin HEAD:${BRANCH_NAME}
           echo 'Guard file updated'
       - name: "BOM update"
