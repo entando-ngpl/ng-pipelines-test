@@ -25,8 +25,8 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
       - name: Checkout
         env:
-          CLONE_URL: ${{ github.pull_request.head.repo.clone_url }}
-          BRANCH_NAME: ${{ github.pull_request.head.ref }}
+          CLONE_URL: ${{ github.repositoryUrl }}
+          BRANCH_NAME: ${{ github.head.ref }}
         run: |
           set -x
           git clone "$CLONE_URL" repo_folder
