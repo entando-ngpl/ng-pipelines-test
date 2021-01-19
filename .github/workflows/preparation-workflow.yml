@@ -51,9 +51,8 @@ jobs:
           git status || true
       - name: "Guard file update"
         run: |
-
-          git pull
           cd repo_folder
+          git pull
           hash=$(sha256sum<<<"${GITHUB_REF}")
           echo "$hash" > guard
           # ---- add existence check
