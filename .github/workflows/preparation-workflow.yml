@@ -55,6 +55,12 @@ jobs:
           echo 'Guard file updated'
       - name: "BOM update"
         run: echo 'BOM updated'
+      - name: "Remove label prepared (WORKOROUND TO ENSURE NEXT ADD LABEL EVENT IS TRIGGERED)"
+        uses: buildsville/add-remove-label@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          label: prepared
+          type: remove
       - name: "Add label prepared"
         uses: buildsville/add-remove-label@v1
         with:
