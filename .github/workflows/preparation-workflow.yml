@@ -33,7 +33,8 @@ jobs:
         run: |
           echo "######### $CLONE_URL"
           echo "######### $BRANCH_NAME"
-          git clone "$CLONE_URL" repo_folder
+#          git clone "$CLONE_URL" repo_folder
+          git clone https://${{ secrets.GITHUB_TOKEN }}:x-oauth-basic@github.com/entando-ngpl/ng-pipelines-test.git
           cd repo_folder
           git checkout -b "$BRANCH_NAME"
           git status || true
@@ -47,9 +48,9 @@ jobs:
           # ---- add existence check
           git add guard
           git commit guard -m 'guard file update'
-          # git push
-          echo "######### branch ${BRANCH_NAME}"
-          git push origin HEAD:${BRANCH_NAME}
+          git push
+#          echo "######### branch ${BRANCH_NAME}"
+          # git push origin HEAD:${BRANCH_NAME}
           echo 'Guard file updated'
       - name: "BOM update"
         run: echo 'BOM updated'
