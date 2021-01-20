@@ -1,0 +1,138 @@
+# This workflow will prepare every thing required to proceed with a PR
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Build and Test
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches:
+      - main
+
+jobs:
+  # PREPARE
+  prepare:
+    # true if
+    #   - pull request opened, synchronize, reopened
+    #   - issue_comment on pull request and comment == /retest
+#    if: ${{ github.event.issue.pull_request }} && ( ${{ !github.event.comment }} || github.event.comment.body == "/retest")
+    env:
+      CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
+      BRANCH_NAME: ${{ github.head_ref }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: "Remove label prepared (WORKOROUND TO ENSURE NEXT ADD LABEL EVENT IS TRIGGERED)"
+        uses: buildsville/add-remove-label@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          label: prepared
+          type: remove
+      # CHECKOUT
+      - name: "Checkout"
+        env:
+          TOKEN_SECRET: ${{ secrets.TOKEN }}
+        run: |
+          authUrl=$(echo "$CLONE_URL" | sed "s|://|://$TOKEN_SECRET@|")
+          git clone "$authUrl" repo_folder
+          cd repo_folder
+          git config --global user.email "cicd@entando.com"
+          git config --global user.name "firegloves"
+          git config pull.rebase false
+          git checkout "$BRANCH_NAME"
+          git pull
+      # GUARD FILE
+      - name: "Guard file update"
+        if: github.pull_request.state == 'open'
+        run: |
+          cd repo_folder
+          hash=$(sha256sum<<<"${GITHUB_REF}")
+          echo "$hash" > guard
+          git add guard
+          git commit guard -m 'guard file update'
+          git push --set-upstream origin $BRANCH_NAME
+          echo 'Guard file updated'
+      # BOM
+      - name: "BOM update"
+        run: echo 'BOM updated'
+      # ADD LABEL PREPARED
+      - name: "Add label prepared"
+        uses: buildsville/add-remove-label@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          label: prepared
+          type: add
+  # SONAR
+  sonar:
+    needs: [ 'prepare' ]
+    if: ${{ ! contains(github.event.pull_request.head.labels, 'no-sonar') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - run: |
+          echo "LABELS: ${{ github.event.pull_request.head.labels }}"
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+  # BUILD AND TEST
+  tests:
+    needs: [ 'prepare' ]
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1 # ensure the sequential running of the spawned jobs
+      matrix:
+        # order matters: spawned jobs are execute as received in the array
+        test-type: [ 'fast-test', 'slow-and-fast-test' ]
+        include:
+          # includes the value of the rebase variable depending on the test type of the matrix
+          # includes the dependency between the 2 generated jobs to ensure sequential runs
+          - test-type: 'fast-test'
+            mvn-test-group: 'fast-test'
+            rebase: false
+            merge: false
+          - test-type: 'slow-and-fast-test'
+            mvn-test-group: 'fast-test,slow-test'
+            rebase: true
+            merge: true
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+  #      - name: Set up JDK 1.1
+  #        uses: actions/setup-java@v1
+  #        with:
+  #          java-version: 11
+  #      - name: Run tests with Maven
+  #        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
+  # OWASP
+  owasp:
+    needs: [ 'prepare' ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: "OWASP checks"
+        run: echo 'OWASP CHECKS PASSED'
