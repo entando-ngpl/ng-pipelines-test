@@ -21,12 +21,10 @@ jobs:
           # includes the dependency between the 2 generated jobs to ensure sequential runs
           - test-type: 'fast-test'
             mvn-test-group: 'fast-test'
-            rebase: false
-            merge: false
+            remove-label: false
           - test-type: 'slow-and-fast-test'
             mvn-test-group: 'fast-test,slow-test'
-            rebase: true
-            merge: true
+            remove-label: true
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2
@@ -51,6 +49,7 @@ jobs:
 #      - name: Run tests with Maven
 #        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
       - name: "Remove label start_build"
+        if: ${{ matrix.remove-label }}
         uses: buildsville/add-remove-label@v1
         with:
           token: ${{secrets.TOKEN}}

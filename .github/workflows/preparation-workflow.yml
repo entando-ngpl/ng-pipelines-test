@@ -18,7 +18,7 @@ jobs:
     # true if
     #   - pull request opened, synchronize, reopened
     #   - label retest added
-    if: github.event.issue.pull_request || github.event.label.name == 'retest'
+    if: ( !github.event.label || github.event.label.name == 'retest' )
     env:
       CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
       BRANCH_NAME: ${{ github.head_ref }}
@@ -28,6 +28,12 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+      - name: "Remove label prepared"
+        uses: buildsville/add-remove-label@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          label: prepared
+          type: remove
       - name: "Checkout"
         env:
           TOKEN_SECRET: ${{ secrets.TOKEN }}
