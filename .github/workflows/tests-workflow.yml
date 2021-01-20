@@ -1,52 +1,52 @@
-# This workflow will build a Java project with Maven
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
-
-name: Automated Tests
-
-on:
-  pull_request:
-    types:
-      - labeled
-jobs:
-  tests:
-    if: github.event.label.name == 'prepared'
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 1 # ensure the sequential running of the spawned jobs
-      matrix:
-        # order matters: spawned jobs are execute as received in the array
-        test-type: ['fast-test', 'slow-and-fast-test']
-        include:
-          # includes the value of the rebase variable depending on the test type of the matrix
-          # includes the dependency between the 2 generated jobs to ensure sequential runs
-          - test-type: 'fast-test'
-            mvn-test-group: 'fast-test'
-            rebase: false
-            merge: false
-          - test-type: 'slow-and-fast-test'
-            mvn-test-group: 'fast-test,slow-test'
-            rebase: true
-            merge: true
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v2
-#      - name: Set up JDK 1.1
-#        uses: actions/setup-java@v1
-#        with:
-#          java-version: 11
-#      - name: Rebase
-#        if: ${{ matrix.rebase }}
-#        run: |
-#          git fetch
-#          git checkout main
-#          git rebase main || git rebase --abort
-##          # rebase on main branch
-##          exists=`git show-ref refs/heads/main`
-##          if [ -n "$exists" ]; then
-##            echo 'branch exists!'
-##          fi
+## This workflow will build a Java project with Maven
+## For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+#
+#name: Automated Tests
+#
+#on:
+#  pull_request:
+#    types:
+#      - labeled
+#jobs:
+#  tests:
+#    if: github.event.label.name == 'prepared'
+#    runs-on: ubuntu-latest
+#    strategy:
+#      max-parallel: 1 # ensure the sequential running of the spawned jobs
+#      matrix:
+#        # order matters: spawned jobs are execute as received in the array
+#        test-type: ['fast-test', 'slow-and-fast-test']
+#        include:
+#          # includes the value of the rebase variable depending on the test type of the matrix
+#          # includes the dependency between the 2 generated jobs to ensure sequential runs
+#          - test-type: 'fast-test'
+#            mvn-test-group: 'fast-test'
+#            rebase: false
+#            merge: false
+#          - test-type: 'slow-and-fast-test'
+#            mvn-test-group: 'fast-test,slow-test'
+#            rebase: true
+#            merge: true
+#    steps:
+#      - name: "Checkout"
+#        uses: actions/checkout@v2
+##      - name: Set up JDK 1.1
+##        uses: actions/setup-java@v1
+##        with:
+##          java-version: 11
+##      - name: Rebase
+##        if: ${{ matrix.rebase }}
+##        run: |
 ##          git fetch
-##          git checkout -b main origin/main
+##          git checkout main
 ##          git rebase main || git rebase --abort
-#      - name: Run tests with Maven
-#        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
+###          # rebase on main branch
+###          exists=`git show-ref refs/heads/main`
+###          if [ -n "$exists" ]; then
+###            echo 'branch exists!'
+###          fi
+###          git fetch
+###          git checkout -b main origin/main
+###          git rebase main || git rebase --abort
+##      - name: Run tests with Maven
+##        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}

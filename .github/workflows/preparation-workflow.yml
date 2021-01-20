@@ -4,10 +4,9 @@
 name: Preparation
 
 on:
-#  push:                        CHECK
-  issue_comment:
-    types:
-      - created
+#  issue_comment:
+#    types:
+#      - created
   pull_request:
     types:
       - opened
@@ -17,11 +16,12 @@ on:
       - main
 
 jobs:
+  # PREPARE
   prepare:
     # true if
     #   - pull request opened, synchronize, reopened
     #   - issue_comment on pull request and comment == /retest
-    if: ${{ github.event.issue.pull_request }} && ( ${{ !github.event.comment }} || github.event.comment.body == "/retest")
+#    if: ${{ github.event.issue.pull_request }} && ( ${{ !github.event.comment }} || github.event.comment.body == "/retest")
     env:
       CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
       BRANCH_NAME: ${{ github.head_ref }}
@@ -67,3 +67,89 @@ jobs:
           token: ${{secrets.TOKEN}}
           label: prepared
           type: add
+      - name: "Dispatch OWASP"
+        run: |
+          curl \
+            -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/entando-ngpl/ng-pipelines-test/actions/workflows/42/dispatches \
+            -d '{"ref":"ref"}'
+  # SONAR
+  sonar:
+    needs: [ 'prepare' ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+  # BUILD AND TEST
+  tests:
+    needs: [ 'prepare' ]
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1 # ensure the sequential running of the spawned jobs
+      matrix:
+        # order matters: spawned jobs are execute as received in the array
+        test-type: [ 'fast-test', 'slow-and-fast-test' ]
+        include:
+          # includes the value of the rebase variable depending on the test type of the matrix
+          # includes the dependency between the 2 generated jobs to ensure sequential runs
+          - test-type: 'fast-test'
+            mvn-test-group: 'fast-test'
+            rebase: false
+            merge: false
+          - test-type: 'slow-and-fast-test'
+            mvn-test-group: 'fast-test,slow-test'
+            rebase: true
+            merge: true
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+  #      - name: Set up JDK 1.1
+  #        uses: actions/setup-java@v1
+  #        with:
+  #          java-version: 11
+  #      - name: Rebase
+  #        if: ${{ matrix.rebase }}
+  #        run: |
+  #          git fetch
+  #          git checkout main
+  #          git rebase main || git rebase --abort
+  ##          # rebase on main branch
+  ##          exists=`git show-ref refs/heads/main`
+  ##          if [ -n "$exists" ]; then
+  ##            echo 'branch exists!'
+  ##          fi
+  ##          git fetch
+  ##          git checkout -b main origin/main
+  ##          git rebase main || git rebase --abort
+  #      - name: Run tests with Maven
+  #        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
+  # OWASP
+  owasp:
+    needs: [ 'prepare' ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: "OWASP checks"
+        run: echo 'OWASP CHECKS PASSED'
