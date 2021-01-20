@@ -1,0 +1,46 @@
+# This workflow will prepare every thing required to proceed with a PR
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Preparation
+
+on:
+  issue_comment:
+    types:
+      - created
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches:
+      - main
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    name: Hub CLI test
+    steps:
+      - name: Clone git repo
+        uses: actions/checkout@v2
+      - name: Checkout Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_URL="${{ github.event.issue.pull_request.url }}"
+          PR_NUM=${PR_URL##*/}
+          echo "Checking out from PR #$PR_NUM based on URL: $PR_URL"
+          hub pr checkout $PR_NUM
+      - name: Configure Git Agent
+        run: |
+          git config --global user.email "my.email@sample.com"
+          git config --global user.name "Me, Not Really (CI bot)"
+      - name: "Guard file update"
+        if: github.pull_request.state == 'open'
+        run: |
+          cd repo_folder
+          hash=$(sha256sum<<<"${GITHUB_REF}")
+          echo "$hash" > guard_hub
+          git add guard
+          git commit guard_hub -m 'guard file update'
+          git push --set-upstream origin $BRANCH_NAME
+          echo 'Guard file updated'
