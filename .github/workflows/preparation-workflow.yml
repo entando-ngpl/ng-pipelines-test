@@ -4,15 +4,12 @@
 name: Preparation
 
 on:
-#  push:                        CHECK
-  issue_comment:
-    types:
-      - created
   pull_request:
     types:
       - opened
       - synchronize
       - reopened
+      - labeled
     branches:
       - main
 
@@ -20,8 +17,8 @@ jobs:
   prepare:
     # true if
     #   - pull request opened, synchronize, reopened
-    #   - issue_comment on pull request and comment == /retest
-    if: ${{ github.event.issue.pull_request }} && ( ${{ !github.event.comment }} || github.event.comment.body == "/retest")
+    #   - label retest added
+    if: github.event.issue.pull_request || github.event.label.name == 'retest'
     env:
       CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
       BRANCH_NAME: ${{ github.head_ref }}
@@ -85,3 +82,10 @@ jobs:
           token: ${{secrets.TOKEN}}
           label: start_owasp
           type: add
+      - name: "Remove label retest"
+        if: github.event.label.name == 'retest'
+        uses: buildsville/add-remove-label@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          label: retest
+          type: remove
