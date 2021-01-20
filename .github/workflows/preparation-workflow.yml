@@ -67,3 +67,21 @@ jobs:
           token: ${{secrets.TOKEN}}
           label: prepared
           type: add
+      - name: "Add label start_build"
+        uses: buildsville/add-remove-label@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          label: start_build
+          type: add
+      - name: "Add label start_sonar"
+        uses: buildsville/add-remove-label@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          label: start_sonar
+          type: add
+      - name: "Add label start_owasp"
+        uses: buildsville/add-remove-label@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          label: start_owasp
+          type: add

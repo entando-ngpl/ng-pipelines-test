@@ -9,7 +9,7 @@ on:
       - labeled
 jobs:
   tests:
-    if: github.event.label.name == 'prepared'
+    if: github.event.label.name == 'start_build'
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1 # ensure the sequential running of the spawned jobs
@@ -50,3 +50,9 @@ jobs:
 ##          git rebase main || git rebase --abort
 #      - name: Run tests with Maven
 #        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
+      - name: "Remove label start_build"
+        uses: buildsville/add-remove-label@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          label: start_build
+          type: remove

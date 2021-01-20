@@ -10,8 +10,14 @@ on:
 
 jobs:
   owasp:
-    if: github.event.label.name == 'prepared'
+    if: github.event.label.name == 'start_owasp'
     runs-on: ubuntu-latest
     steps:
       - name: "OWASP checks"
         run: echo 'OWASP CHECKS PASSED'
+      - name: "Remove label start_owasp"
+        uses: buildsville/add-remove-label@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          label: start_owasp
+          type: remove
