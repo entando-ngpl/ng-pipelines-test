@@ -22,18 +22,19 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v2
       - name: "Check Master Misalignment"
-        run: |
-          # get master commit id
-          masterCommitId=$(git log -n1 --format="%h")
-          echo $masterCommitId
-          # get pr commit it
-          echo "Check misalignment"
-      - name: "Derive and set version"
-        run: |
-          echo "Derive and set version"
-      - name: "Build final artifact"
-        run: |
-          echo "Build final artifact"
-      - name: "Publish final artifact"
-        run: |
-          echo "Publish final artifact"
+        run: exit 1
+#        run: |
+#          # get master commit id
+#          masterCommitId=$(git log -n1 --format="%h")
+#          echo $masterCommitId
+#          # get pr commit it
+#          echo "Check misalignment"
+#      - name: "Derive and set version"
+#        run: |
+#          echo "Derive and set version"
+#      - name: "Build final artifact"
+#        run: |
+#          echo "Build final artifact"
+#      - name: "Publish final artifact"
+#        run: |
+#          echo "Publish final artifact"
