@@ -29,10 +29,8 @@ jobs:
         env:
           TMPDIR: "/home/runner/work/_temp"
         run: |
-          cd repo_folder
+          # fetch tags
           git fetch --tag
-          # checkout milestones branch
-          [ -z "$(git branch --list milestones)" ] && git co -b milestones
           # set version
           lastTag=$( git tag -l | tail -1 )
           IFS='.' read -r X Y Z <<< "$lastTag"
@@ -45,14 +43,22 @@ jobs:
             cat "$TMPDIR/mvn-compile.log"
             exit $FILENO
           }
+          # checkout milestones branch
+          BRANCH_NAME="rel_v$X.$Y.$Z"
+          git checkout -b "$BRANCH_NAME"
           # commit
           git add .
           git commit -m "v$X.$Y.$Z"
           # tag
           git tag "v$X.$Y.$Z"
           # push
-          git push --set-upstream origin milestones --force
+          git push --set-upstream origin "$BRANCH_NAME" --force
           git push --tags
+          # delete branches
+          git checkout main
+          git push -d origin "$BRANCH_NAME"
+          git branch -D "$BRANCH_NAME"
+
       - name: "Build final artifact"
         run: |
           echo "Build final artifact"
