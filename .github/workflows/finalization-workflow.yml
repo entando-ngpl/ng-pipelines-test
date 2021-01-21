@@ -25,30 +25,25 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      #      - name: "Check Master Misalignment"
-      #        run: |
-      #          # get master commit id
-      #          masterCommitId=$(git log -n1 --format="%h")
-      #          echo $masterCommitId
-      #          # get pr commit it
-      #          echo "Check misalignment"
       - name: "Derive and set version"
+        env:
+          TMPDIR: "/home/runner/work/_temp"
         run: |
+          cd repo_folder
           git fetch --tag
           lastTag=$( git tag -l | tail -1 )
-          echo $lastTag
           IFS='.' read -r X Y Z <<< "$lastTag"
           X="${X//v/}"    # tag version to pom version
-          ((Z++)) || {
-            echo "UNABLE TO DETERMINE THE POM VERSION" 1>&2
-            exit 99
-          }
-          mvn versions:set -DnewVersion="$X.$Y.$Z"
+          Z=$((Z+1))
+          mvn versions:set -DnewVersion="$X.$Y.$Z" > "$TMPDIR/mvn-version.log"
           echo "Version updated"
-          mvn clean package > mvn-output.log
-#      - name: "Build final artifact"
-#        run: |
-#          echo "Build final artifact"
-#      - name: "Publish final artifact"
-#        run: |
-#          echo "Publish final artifact"
+          mvn compile > "$TMPDIR/mvn-compile.log" || {
+            cat "$TMPDIR/mvn-compile.log"
+            exit $FILENO
+          }
+      - name: "Build final artifact"
+        run: |
+          echo "Build final artifact"
+      - name: "Publish final artifact"
+        run: |
+          echo "Publish final artifact"
