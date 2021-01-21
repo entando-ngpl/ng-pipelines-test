@@ -30,11 +30,12 @@ jobs:
 #          echo "Check misalignment"
       - name: "Derive and set version"
         run: |
-          echo "Derive and set version"
           lastTag=$( git tag -l | tail -1 )
           IFS='.' read -r X Y Z <<< "$lastTag"
           ((Z++))
-
+          mvn versions:set -DnewVersion="$X.$Y.$Z"
+          mvn clean verify
+          echo "Version updated"
 #      - name: "Build final artifact"
 #        run: |
 #          echo "Build final artifact"
