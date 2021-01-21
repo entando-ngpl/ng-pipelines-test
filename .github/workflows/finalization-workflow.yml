@@ -30,6 +30,7 @@ jobs:
 #          echo "Check misalignment"
       - name: "Derive and set version"
         run: |
+          git fetch --tag
           lastTag=$( git tag -l | tail -1 )
           echo "######## 1"
           echo $lastTag
