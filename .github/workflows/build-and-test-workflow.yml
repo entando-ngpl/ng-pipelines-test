@@ -49,15 +49,15 @@ jobs:
           git pull
       - name: "Derive and set version"
         run: |
+          cd repo_folder
           git fetch --tag
           lastTag=$( git tag -l | tail -1 )
-          echo $lastTag
+          echo "LAST TAG $lastTag" 1>&2
           IFS='.' read -r X Y Z <<< "$lastTag"
           X="${X//v/}"    # tag version to pom version
-          ((Z++)) || {
-            echo "UNABLE TO DETERMINE THE POM VERSION" 1>&2
-            exit 99
-          }
+          echo "VALS $X -- $Y -- $Z" 1>&2
+          ((Z++)) || true
+          echo "NEW VALS $X -- $Y -- $Z" 1>&2
           mvn versions:set -DnewVersion="$X.$Y.$Z"
           echo "Version updated"
           mvn clean package > mvn-output.log
