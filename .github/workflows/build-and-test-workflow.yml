@@ -39,6 +39,7 @@ jobs:
         env:
           TOKEN_SECRET: ${{ secrets.TOKEN }}
         run: |
+          jq
           authUrl=$(echo "$CLONE_URL" | sed "s|://|://$TOKEN_SECRET@|")
           git clone "$authUrl" repo_folder
           cd repo_folder
