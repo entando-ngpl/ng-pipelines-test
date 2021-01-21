@@ -22,6 +22,7 @@ jobs:
     env:
       CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
       BRANCH_NAME: ${{ github.head_ref }}
+      TMPDIR: "/home/runner/work/_temp"
     runs-on: ubuntu-latest
     steps:
       - name: Dump GitHub context
@@ -58,11 +59,11 @@ jobs:
           echo "VALS $X -- $Y -- $Z" 1>&2
           Z=$((Z+1))
           echo "NEW VALS $X -- $Y -- $Z" 1>&2
-          mvn versions:set -DnewVersion="$X.$Y.$Z" > /tmp/mvn-version.log
+          mvn versions:set -DnewVersion="$X.$Y.$Z" > "$TMPDIR/mvn-version.log"
           echo "Version updated"
-          mvn compile > /tmp/mvn-compile.log
+          mvn compile > "$TMPDIR/mvn-compile.log" || cat "$TMPDIR/mvn-compile.log"
           echo "XXXXXXXXX $?"
-          ls /tmp/*.log
+          ls "$TMPDIR"/*.log
           exit 0
       # GUARD FILE
       - name: "Guard file update"
