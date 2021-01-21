@@ -56,8 +56,7 @@ jobs:
           IFS='.' read -r X Y Z <<< "$lastTag"
           X="${X//v/}"    # tag version to pom version
           echo "VALS $X -- $Y -- $Z" 1>&2
-          Z="-1"
-          ((Z++)) || true
+          Z=$((Z+1))
           echo "NEW VALS $X -- $Y -- $Z" 1>&2
           mvn versions:set -DnewVersion="$X.$Y.$Z"
           echo "Version updated"
