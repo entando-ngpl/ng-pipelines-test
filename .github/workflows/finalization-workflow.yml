@@ -31,9 +31,13 @@ jobs:
       - name: "Derive and set version"
         run: |
           lastTag=$( git tag -l | tail -1 )
+          echo "######## 1"
           IFS='.' read -r X Y Z <<< "$lastTag"
+          echo "######## 2"
           ((Z++))
+          echo "######## 3"
           mvn versions:set -DnewVersion="$X.$Y.$Z"
+          echo "######## 4"
           mvn clean verify
           echo "Version updated"
 #      - name: "Build final artifact"
