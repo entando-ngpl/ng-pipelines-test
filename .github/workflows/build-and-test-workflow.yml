@@ -58,10 +58,11 @@ jobs:
           echo "VALS $X -- $Y -- $Z" 1>&2
           Z=$((Z+1))
           echo "NEW VALS $X -- $Y -- $Z" 1>&2
-          mvn versions:set -DnewVersion="$X.$Y.$Z"
+          mvn versions:set -DnewVersion="$X.$Y.$Z" > /tmp/mvn-version.log
           echo "Version updated"
-          # bash -c "mvn clean package > mvn-output.log"
+          mvn compile > /tmp/mvn-compile.log
           echo "XXXXXXXXX $?"
+          ls /tmp/*.log
           exit 0
       # GUARD FILE
       - name: "Guard file update"
