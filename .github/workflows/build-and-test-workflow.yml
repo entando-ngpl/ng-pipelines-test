@@ -13,67 +13,67 @@ on:
       - main
 
 jobs:
-  # PREPARE
-  prepare:
-    # true if
-    #   - pull request opened, synchronize, reopened
-    #   - issue_comment on pull request and comment == /retest
-#    if: ${{ github.event.issue.pull_request }} && ( ${{ !github.event.comment }} || github.event.comment.body == "/retest")
-    env:
-      CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
-      BRANCH_NAME: ${{ github.head_ref }}
-      LABELS: ${{ toJson(github.event.pull_request.labels) }}
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "LABELS: $LABELS"
-          #          jsonLabels=$(toJson(github.event.pull_request.head.labels))
-          #          echo "### JSON $jsonLabels"
-          echo $(jq '.[] | select(.name=="prepared")' <<< $LABELS)
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: "Remove label prepared (WORKOROUND TO ENSURE NEXT ADD LABEL EVENT IS TRIGGERED)"
-        uses: buildsville/add-remove-label@v1
-        with:
-          token: ${{secrets.TOKEN}}
-          label: prepared
-          type: remove
-      # CHECKOUT
-      - name: "Checkout"
-        env:
-          TOKEN_SECRET: ${{ secrets.TOKEN }}
-        run: |
-          authUrl=$(echo "$CLONE_URL" | sed "s|://|://$TOKEN_SECRET@|")
-          git clone "$authUrl" repo_folder
-          cd repo_folder
-          git config --global user.email "cicd@entando.com"
-          git config --global user.name "firegloves"
-          git config pull.rebase false
-          git checkout "$BRANCH_NAME"
-          git pull
-      # GUARD FILE
-      - name: "Guard file update"
-        if: github.pull_request.state == 'open'
-        run: |
-          cd repo_folder
-          hash=$(sha256sum<<<"${GITHUB_REF}")
-          echo "$hash" > guard
-          git add guard
-          git commit guard -m 'guard file update'
-          git push --set-upstream origin $BRANCH_NAME
-          echo 'Guard file updated'
-      # BOM
-      - name: "BOM update"
-        run: echo 'BOM updated'
-      # ADD LABEL PREPARED
-      - name: "Add label prepared"
-        uses: buildsville/add-remove-label@v1
-        with:
-          token: ${{secrets.TOKEN}}
-          label: prepared
-          type: add
+#  # PREPARE
+#  prepare:
+#    # true if
+#    #   - pull request opened, synchronize, reopened
+#    #   - issue_comment on pull request and comment == /retest
+##    if: ${{ github.event.issue.pull_request }} && ( ${{ !github.event.comment }} || github.event.comment.body == "/retest")
+#    env:
+#      CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
+#      BRANCH_NAME: ${{ github.head_ref }}
+##      LABELS: ${{ toJson(github.event.pull_request.labels) }}
+#    runs-on: ubuntu-latest
+#    steps:
+##      - run: |
+##          echo "LABELS: $LABELS"
+##          #          jsonLabels=$(toJson(github.event.pull_request.head.labels))
+##          #          echo "### JSON $jsonLabels"
+##          echo $(jq '.[] | select(.name=="prepared")' <<< $LABELS)
+#      - name: Dump GitHub context
+#        env:
+#          GITHUB_CONTEXT: ${{ toJson(github) }}
+#        run: echo "$GITHUB_CONTEXT"
+#      - name: "Remove label prepared (WORKOROUND TO ENSURE NEXT ADD LABEL EVENT IS TRIGGERED)"
+#        uses: buildsville/add-remove-label@v1
+#        with:
+#          token: ${{secrets.TOKEN}}
+#          label: prepared
+#          type: remove
+#      # CHECKOUT
+#      - name: "Checkout"
+#        env:
+#          TOKEN_SECRET: ${{ secrets.TOKEN }}
+#        run: |
+#          authUrl=$(echo "$CLONE_URL" | sed "s|://|://$TOKEN_SECRET@|")
+#          git clone "$authUrl" repo_folder
+#          cd repo_folder
+#          git config --global user.email "cicd@entando.com"
+#          git config --global user.name "firegloves"
+#          git config pull.rebase false
+#          git checkout "$BRANCH_NAME"
+#          git pull
+#      # GUARD FILE
+#      - name: "Guard file update"
+#        if: github.pull_request.state == 'open'
+#        run: |
+#          cd repo_folder
+#          hash=$(sha256sum<<<"${GITHUB_REF}")
+#          echo "$hash" > guard
+#          git add guard
+#          git commit guard -m 'guard file update'
+#          git push --set-upstream origin $BRANCH_NAME
+#          echo 'Guard file updated'
+#      # BOM
+#      - name: "BOM update"
+#        run: echo 'BOM updated'
+#      # ADD LABEL PREPARED
+#      - name: "Add label prepared"
+#        uses: buildsville/add-remove-label@v1
+#        with:
+#          token: ${{secrets.TOKEN}}
+#          label: prepared
+#          type: add
 #  # SONAR
 #          sonar:
 #            needs: [ 'prepare' ]
@@ -133,10 +133,27 @@ jobs:
 #  #          java-version: 11
 #  #      - name: Run tests with Maven
 #  #        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
-#  # OWASP
-#  owasp:
+  # OWASP
+  owasp:
 #    needs: [ 'prepare' ]
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: "OWASP checks"
-#        run: echo 'OWASP CHECKS PASSED'
+    env:
+      LABELS: ${{ toJson(github.event.pull_request.labels) }}
+#      NO-OWASP-LABEL: ${{ jq '.[] | select(.name=="prepared")' <<< $LABELS }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Check skip label"
+        id: skip-label-check
+        run: |
+          echo "LABELS: $LABELS"
+          #          echo "NO-OWASP-LABEL: $NO-OWASP-LABEL"
+          #          jsonLabels=$(toJson(github.event.pull_request.head.labels))
+          #          echo "### JSON $jsonLabels"
+          SKIP_LABEL=$(jq '.[] | select(.name=="prepared")' <<< $LABELS)
+          echo "SKIP_LABEL $SKIP_LABEL"
+          echo "::set-output name=SKIP_STEP::$(jq '.[] | select(.name=="prepared")' <<< $LABELS)\n"
+      - name: "OWASP checks 1"
+        if: ${{ steps.skip-label-check.outputs.SKIP_STEP }}
+        run: echo 'OWASP CHECKS PASSED 1'
+      - name: "OWASP checks 2"
+        if: ${{ ! steps.skip-label-check.outputs.SKIP_STEP }}
+        run: echo 'OWASP CHECKS PASSED 2'
