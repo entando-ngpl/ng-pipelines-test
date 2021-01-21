@@ -47,6 +47,20 @@ jobs:
           git config pull.rebase false
           git checkout "$BRANCH_NAME"
           git pull
+      - name: "Derive and set version"
+        run: |
+          git fetch --tag
+          lastTag=$( git tag -l | tail -1 )
+          echo $lastTag
+          IFS='.' read -r X Y Z <<< "$lastTag"
+          X="${X//v/}"    # tag version to pom version
+          ((Z++)) || {
+            echo "UNABLE TO DETERMINE THE POM VERSION" 1>&2
+            exit 99
+          }
+          mvn versions:set -DnewVersion="$X.$Y.$Z"
+          echo "Version updated"
+          mvn clean package > mvn-output.log
       # GUARD FILE
       - name: "Guard file update"
         if: github.pull_request.state == 'open'
