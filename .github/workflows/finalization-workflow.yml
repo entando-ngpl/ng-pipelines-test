@@ -29,6 +29,8 @@ jobs:
         env:
           TMPDIR: "/home/runner/work/_temp"
         run: |
+          git config --global user.email "cicd@entando.com"
+          git config --global user.name "firegloves"
           # fetch tags
           git fetch --tag
           # set version
