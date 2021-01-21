@@ -1,0 +1,20 @@
+[
+  {
+    "color": "ededed",
+    "default": false,
+    "description": null,
+    "id": 2669990609,
+    "name": "prepared",
+    "node_id": "MDU6TGFiZWwyNjY5OTkwNjA5",
+    "url": "https://api.github.com/repos/entando-ngpl/ng-pipelines-test/labels/prepared"
+  },
+  {
+    "color": "ededed",
+    "default": false,
+    "description": null,
+    "id": 2669990609,
+    "name": "bababab",
+    "node_id": "MDU6TGFiZWwyNjY5OTkwNjA5",
+    "url": "https://api.github.com/repos/entando-ngpl/ng-pipelines-test/labels/prepared"
+  }
+]
