@@ -60,7 +60,9 @@ jobs:
           echo "NEW VALS $X -- $Y -- $Z" 1>&2
           mvn versions:set -DnewVersion="$X.$Y.$Z"
           echo "Version updated"
-          mvn clean package > mvn-output.log
+          bash -c "mvn clean package > mvn-output.log"
+          echo "XXXXXXXXX $?"
+          exit 0
       # GUARD FILE
       - name: "Guard file update"
         if: github.pull_request.state == 'open'
