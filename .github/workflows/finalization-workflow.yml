@@ -1,0 +1,40 @@
+# This workflow will build and publish the final artifact
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Finalization
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    env:
+      CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
+      BRANCH_NAME: ${{ github.head_ref }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: "Checkout"
+        uses: actions/checkout@v2
+      - name: "Check Master Misalignment"
+        run: exit 1
+#        run: |
+#          # get master commit id
+#          masterCommitId=$(git log -n1 --format="%h")
+#          echo $masterCommitId
+#          # get pr commit it
+#          echo "Check misalignment"
+#      - name: "Derive and set version"
+#        run: |
+#          echo "Derive and set version"
+#      - name: "Build final artifact"
+#        run: |
+#          echo "Build final artifact"
+#      - name: "Publish final artifact"
+#        run: |
+#          echo "Publish final artifact"
