@@ -48,6 +48,10 @@ jobs:
           git config pull.rebase false
           git checkout "$BRANCH_NAME"
           git pull
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
       - name: "Derive and set version"
         run: |
           cd repo_folder
@@ -61,10 +65,10 @@ jobs:
           echo "NEW VALS $X -- $Y -- $Z" 1>&2
           mvn versions:set -DnewVersion="$X.$Y.$Z" > "$TMPDIR/mvn-version.log"
           echo "Version updated"
-          mvn compile > "$TMPDIR/mvn-compile.log" || cat "$TMPDIR/mvn-compile.log"
-          echo "XXXXXXXXX $?"
-          ls "$TMPDIR"/*.log
-          exit 0
+          mvn compile > "$TMPDIR/mvn-compile.log" || {
+            cat "$TMPDIR/mvn-compile.log"
+            exit $FILENO
+          }
       # GUARD FILE
       - name: "Guard file update"
         if: github.pull_request.state == 'open'
