@@ -21,29 +21,28 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
       - name: "Checkout"
         uses: actions/checkout@v2
-#      - name: "Check Master Misalignment"
-#        run: |
-#          # get master commit id
-#          masterCommitId=$(git log -n1 --format="%h")
-#          echo $masterCommitId
-#          # get pr commit it
-#          echo "Check misalignment"
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      #      - name: "Check Master Misalignment"
+      #        run: |
+      #          # get master commit id
+      #          masterCommitId=$(git log -n1 --format="%h")
+      #          echo $masterCommitId
+      #          # get pr commit it
+      #          echo "Check misalignment"
       - name: "Derive and set version"
         run: |
           git fetch --tag
           lastTag=$( git tag -l | tail -1 )
-          echo "######## 1"
           echo $lastTag
           IFS='.' read -r X Y Z <<< "$lastTag"
-          echo "######## 2"
-          echo "$X -- $Y -- $Z"
-          ((Z++)) || true
-          echo "######## 3"
-          echo "$Z"
+          X="${X//v/}"    # tag version to pom version
+          ((Z++)) || {echo "UNABLE TO DETERMINE THE POM VERSION" 1>&2 && exit 99;}
           mvn versions:set -DnewVersion="$X.$Y.$Z"
-          echo "######## 4"
-          mvn clean verify
           echo "Version updated"
+          mvn clean package > mvn-output.log
 #      - name: "Build final artifact"
 #        run: |
 #          echo "Build final artifact"
