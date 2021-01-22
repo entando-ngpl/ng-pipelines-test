@@ -129,17 +129,17 @@ jobs:
           SKIP_LABEL=$(jq '.[] | select(.name=="no-test")' <<< $LABELS)
           if [ -z "$SKIP_LABEL" ]; then EXECUTE_STEP=true; else EXECUTE_STEP=false; fi
           echo "::set-output name=EXECUTE_STEP::$EXECUTE_STEP"
-#      - name: "Checkout"
-#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-#        uses: actions/checkout@v2
-#      - name: Set up JDK 1.1
-#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-#        uses: actions/setup-java@v1
-#        with:
-#          java-version: 11
-#      - name: Run tests with Maven
-#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-#        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
+      - name: "Checkout"
+        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+        uses: actions/checkout@v2
+      - name: Set up JDK 1.1
+        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Run tests with Maven
+        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
       - name: "Remove NO-TEST label"
         if: steps.skip-label-check.outputs.EXECUTE_STEP != 'true' && matrix.remove-label
         uses: buildsville/add-remove-label@v1
