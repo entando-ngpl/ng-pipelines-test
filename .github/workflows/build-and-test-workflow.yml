@@ -58,50 +58,51 @@ jobs:
     needs: [ 'prepare' ]
     runs-on: ubuntu-latest
     steps:
-      - name: "Check NO-SONAR label"
-        env:
-          LABELS: ${{ toJson(github.event.pull_request.labels) }}
-        id: skip-label-check
-        run: |
-          SKIP_LABEL=$(jq -r '.[] | select(.name=="no-sonar")' <<< $LABELS)
-          if [ -z "$SKIP_LABEL" ]; then EXECUTE_STEP=true; else EXECUTE_STEP=false; fi
-          echo "::set-output name=EXECUTE_STEP::$EXECUTE_STEP"
-      - uses: actions/checkout@v2
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Set up JDK 11
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - name: Cache SonarCloud packages
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: Cache Maven packages
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        uses: actions/cache@v1
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-      - name: Build and analyze
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-      - name: "Remove NO-SONAR label"
-        if: steps.skip-label-check.outputs.EXECUTE_STEP != 'true'
-        uses: buildsville/add-remove-label@v1
-        with:
-          token: ${{secrets.TOKEN}}
-          label: no-sonar
-          type: remove
+      - run: exit 1
+#      - name: "Check NO-SONAR label"
+#        env:
+#          LABELS: ${{ toJson(github.event.pull_request.labels) }}
+#        id: skip-label-check
+#        run: |
+#          SKIP_LABEL=$(jq -r '.[] | select(.name=="no-sonar")' <<< $LABELS)
+#          if [ -z "$SKIP_LABEL" ]; then EXECUTE_STEP=true; else EXECUTE_STEP=false; fi
+#          echo "::set-output name=EXECUTE_STEP::$EXECUTE_STEP"
+#      - uses: actions/checkout@v2
+#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+#        with:
+#          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+#      - name: Set up JDK 11
+#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+#        uses: actions/setup-java@v1
+#        with:
+#          java-version: 11
+#      - name: Cache SonarCloud packages
+#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+#        uses: actions/cache@v1
+#        with:
+#          path: ~/.sonar/cache
+#          key: ${{ runner.os }}-sonar
+#          restore-keys: ${{ runner.os }}-sonar
+#      - name: Cache Maven packages
+#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+#        uses: actions/cache@v1
+#        with:
+#          path: ~/.m2
+#          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: ${{ runner.os }}-m2
+#      - name: Build and analyze
+#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+#      - name: "Remove NO-SONAR label"
+#        if: steps.skip-label-check.outputs.EXECUTE_STEP != 'true'
+#        uses: buildsville/add-remove-label@v1
+#        with:
+#          token: ${{secrets.TOKEN}}
+#          label: no-sonar
+#          type: remove
   # BUILD AND TEST
   tests:
     needs: [ 'prepare' ]
