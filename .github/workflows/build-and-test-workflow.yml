@@ -43,132 +43,176 @@ jobs:
           git config pull.rebase false
           git checkout "$BRANCH_NAME"
           git pull
-      # BOM
-      - name: "BOM update"
-        run: echo 'BOM updated'
-      # ADD LABEL PREPARED
-      - name: "Add label prepared"
-        uses: buildsville/add-remove-label@v1
-        with:
-          token: ${{secrets.TOKEN}}
-          label: prepared
-          type: add
-  # SONAR
-  sonar:
-    needs: [ 'prepare' ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Check NO-SONAR label"
+      # PR FORMAT CHECK
+      - name: "PR format check"
+        id: pr-format-check
         env:
-          LABELS: ${{ toJson(github.event.pull_request.labels) }}
-        id: skip-label-check
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          SHA: ${{ github.sha }}
+          URLT: ${{ github.event.repository.statuses_url }}
         run: |
-          SKIP_LABEL=$(jq -r '.[] | select(.name=="no-sonar")' <<< $LABELS)
-          if [ -z "$SKIP_LABEL" ]; then EXECUTE_STEP=true; else EXECUTE_STEP=false; fi
-          echo "::set-output name=EXECUTE_STEP::$EXECUTE_STEP"
-      - uses: actions/checkout@v2
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Set up JDK 11
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - name: Cache SonarCloud packages
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: Cache Maven packages
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        uses: actions/cache@v1
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-      - name: Build and analyze
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-      - name: "Remove NO-SONAR label"
-        if: steps.skip-label-check.outputs.EXECUTE_STEP != 'true'
-        uses: buildsville/add-remove-label@v1
-        with:
-          token: ${{secrets.TOKEN}}
-          label: no-sonar
-          type: remove
-  # BUILD AND TEST
-  tests:
-    needs: [ 'prepare' ]
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 1 # ensure the sequential running of the spawned jobs
-      matrix:
-        # order matters: spawned jobs are execute as received in the array
-        test-type: [ 'fast-test', 'slow-and-fast-test' ]
-        include:
-          # includes the value of the rebase variable depending on the test type of the matrix
-          # includes the dependency between the 2 generated jobs to ensure sequential runs
-          - test-type: 'fast-test'
-            mvn-test-group: 'fast-test'
-            remove-label: false
-          - test-type: 'slow-and-fast-test'
-            mvn-test-group: 'fast-test,slow-test'
-            remove-label: true
-    steps:
-      - name: "Check NO-TEST label"
-        env:
-          LABELS: ${{ toJson(github.event.pull_request.labels) }}
-        id: skip-label-check
-        run: |
-          SKIP_LABEL=$(jq '.[] | select(.name=="no-test")' <<< $LABELS)
-          if [ -z "$SKIP_LABEL" ]; then EXECUTE_STEP=true; else EXECUTE_STEP=false; fi
-          echo "::set-output name=EXECUTE_STEP::$EXECUTE_STEP"
-#      - name: "Checkout"
+          cd repo_folder
+
+          # fn to update status check description
+          echo "$DBG"
+          SHA2="$(git rev-parse HEAD)"
+          echo "XXXXXXXXXXXXX-1: $SHA"
+          echo "XXXXXXXXXXXXX-2: $SHA2"
+          URL="${URLT//\{sha\}/$SHA}"
+          echo "XXXX $URL"
+
+          upd() {
+            curl "$URL" \
+              -X POST \
+              -H "Accept: application/json" \
+              -H 'authorization: Bearer ${{ secrets.TOKEN }}' \
+              -d "{\"state\":\"$1\", \"description\": \"$3\", \"context\":\"$2\"}" \
+            || true
+          }
+
+          echo "TITLE: $PR_TITLE"
+
+          # check name consistency
+          if [[ ! "$PR_TITLE" =~ ^[A-Z]{2,5}-[0-9]{1,5}([[:space:]]|:) ]]
+          then
+            echo "NOT MATCHING"
+            upd "failure" "XXX" "YYY"
+            # upd "failure" "Failed" "The Pull Request title does not respect the expected format. E.g. ENG-1234 feature description"
+            exit 1
+          fi
+
+          echo '#### again'
+
+          # get PR story id
+          PR_STORY_ID=$(echo "$PR_TITLE" | sed -E 's/([A-Z]{2,5}-[0-9]{1,5}).*/\1/')
+          echo "PR_STORY_ID $PR_STORY_ID"
+          echo "::set-output name=PR_STORY_ID::$PR_STORY_ID"
+#      # BOM
+#      - name: "BOM update"
+#        run: echo 'BOM updated'
+#      # ADD LABEL PREPARED
+#      - name: "Add label prepared"
+#        uses: buildsville/add-remove-label@v1
+#        with:
+#          token: ${{secrets.TOKEN}}
+#          label: prepared
+#          type: add
+#  # SONAR
+#  sonar:
+#    needs: [ 'prepare' ]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: "Check NO-SONAR label"
+#        env:
+#          LABELS: ${{ toJson(github.event.pull_request.labels) }}
+#        id: skip-label-check
+#        run: |
+#          SKIP_LABEL=$(jq -r '.[] | select(.name=="no-sonar")' <<< $LABELS)
+#          if [ -z "$SKIP_LABEL" ]; then EXECUTE_STEP=true; else EXECUTE_STEP=false; fi
+#          echo "::set-output name=EXECUTE_STEP::$EXECUTE_STEP"
+#      - uses: actions/checkout@v2
 #        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-#        uses: actions/checkout@v2
-#      - name: Set up JDK 1.1
+#        with:
+#          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+#      - name: Set up JDK 11
 #        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
 #        uses: actions/setup-java@v1
 #        with:
 #          java-version: 11
-#      - name: Run tests with Maven
+#      - name: Cache SonarCloud packages
 #        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-#        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
-      - name: "Remove NO-TEST label"
-        if: steps.skip-label-check.outputs.EXECUTE_STEP != 'true' && matrix.remove-label
-        uses: buildsville/add-remove-label@v1
-        with:
-          token: ${{secrets.TOKEN}}
-          label: no-test
-          type: remove
-  # OWASP
-  owasp:
-    needs: [ 'prepare' ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Check NO-OWASP label"
-        env:
-          LABELS: ${{ toJson(github.event.pull_request.labels) }}
-        id: skip-label-check
-        run: |
-          SKIP_LABEL=$(jq '.[] | select(.name=="no-owasp")' <<< $LABELS)
-          if [ -z "$SKIP_LABEL" ]; then EXECUTE_STEP=true; else EXECUTE_STEP=false; fi
-          echo "::set-output name=EXECUTE_STEP::$EXECUTE_STEP"
-      - name: "OWASP checks"
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        run: |
-          echo ${{ steps.skip-label-check.outputs.EXECUTE_STEP }}
-          echo 'OWASP CHECKS PASSED '
-      - name: "Remove NO-OWASP label"
-        if: steps.skip-label-check.outputs.EXECUTE_STEP != 'true'
-        uses: buildsville/add-remove-label@v1
-        with:
-          token: ${{secrets.TOKEN}}
-          label: no-owasp
-          type: remove
+#        uses: actions/cache@v1
+#        with:
+#          path: ~/.sonar/cache
+#          key: ${{ runner.os }}-sonar
+#          restore-keys: ${{ runner.os }}-sonar
+#      - name: Cache Maven packages
+#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+#        uses: actions/cache@v1
+#        with:
+#          path: ~/.m2
+#          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: ${{ runner.os }}-m2
+#      - name: Build and analyze
+#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+#      - name: "Remove NO-SONAR label"
+#        if: steps.skip-label-check.outputs.EXECUTE_STEP != 'true'
+#        uses: buildsville/add-remove-label@v1
+#        with:
+#          token: ${{secrets.TOKEN}}
+#          label: no-sonar
+#          type: remove
+#  # BUILD AND TEST
+#  tests:
+#    needs: [ 'prepare' ]
+#    runs-on: ubuntu-latest
+#    strategy:
+#      max-parallel: 1 # ensure the sequential running of the spawned jobs
+#      matrix:
+#        # order matters: spawned jobs are execute as received in the array
+#        test-type: [ 'fast-test', 'slow-and-fast-test' ]
+#        include:
+#          # includes the value of the rebase variable depending on the test type of the matrix
+#          # includes the dependency between the 2 generated jobs to ensure sequential runs
+#          - test-type: 'fast-test'
+#            mvn-test-group: 'fast-test'
+#            remove-label: false
+#          - test-type: 'slow-and-fast-test'
+#            mvn-test-group: 'fast-test,slow-test'
+#            remove-label: true
+#    steps:
+#      - name: "Check NO-TEST label"
+#        env:
+#          LABELS: ${{ toJson(github.event.pull_request.labels) }}
+#        id: skip-label-check
+#        run: |
+#          SKIP_LABEL=$(jq '.[] | select(.name=="no-test")' <<< $LABELS)
+#          if [ -z "$SKIP_LABEL" ]; then EXECUTE_STEP=true; else EXECUTE_STEP=false; fi
+#          echo "::set-output name=EXECUTE_STEP::$EXECUTE_STEP"
+##      - name: "Checkout"
+##        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+##        uses: actions/checkout@v2
+##      - name: Set up JDK 1.1
+##        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+##        uses: actions/setup-java@v1
+##        with:
+##          java-version: 11
+##      - name: Run tests with Maven
+##        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+##        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
+#      - name: "Remove NO-TEST label"
+#        if: steps.skip-label-check.outputs.EXECUTE_STEP != 'true' && matrix.remove-label
+#        uses: buildsville/add-remove-label@v1
+#        with:
+#          token: ${{secrets.TOKEN}}
+#          label: no-test
+#          type: remove
+#  # OWASP
+#  owasp:
+#    needs: [ 'prepare' ]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: "Check NO-OWASP label"
+#        env:
+#          LABELS: ${{ toJson(github.event.pull_request.labels) }}
+#        id: skip-label-check
+#        run: |
+#          SKIP_LABEL=$(jq '.[] | select(.name=="no-owasp")' <<< $LABELS)
+#          if [ -z "$SKIP_LABEL" ]; then EXECUTE_STEP=true; else EXECUTE_STEP=false; fi
+#          echo "::set-output name=EXECUTE_STEP::$EXECUTE_STEP"
+#      - name: "OWASP checks"
+#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+#        run: |
+#          echo ${{ steps.skip-label-check.outputs.EXECUTE_STEP }}
+#          echo 'OWASP CHECKS PASSED '
+#      - name: "Remove NO-OWASP label"
+#        if: steps.skip-label-check.outputs.EXECUTE_STEP != 'true'
+#        uses: buildsville/add-remove-label@v1
+#        with:
+#          token: ${{secrets.TOKEN}}
+#          label: no-owasp
+#          type: remove
