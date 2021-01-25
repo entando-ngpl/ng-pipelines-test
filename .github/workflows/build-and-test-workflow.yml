@@ -18,6 +18,9 @@ jobs:
     env:
       CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
       BRANCH_NAME: ${{ github.head_ref }}
+      REPO_FOLDER: repo_folder
+      SHA: ${{ github.sha }}
+      URLT: ${{ github.event.repository.statuses_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Dump GitHub context
@@ -36,8 +39,8 @@ jobs:
           TOKEN_SECRET: ${{ secrets.TOKEN }}
         run: |
           authUrl=$(echo "$CLONE_URL" | sed "s|://|://$TOKEN_SECRET@|")
-          git clone "$authUrl" repo_folder
-          cd repo_folder
+          git clone "$authUrl" "$REPO_FOLDER"
+          cd "$REPO_FOLDER"
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
           git config pull.rebase false
@@ -48,10 +51,8 @@ jobs:
         id: pr-format-check
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
-          SHA: ${{ github.sha }}
-          URLT: ${{ github.event.repository.statuses_url }}
         run: |
-          cd repo_folder
+          cd "$REPO_FOLDER"
 
           # fn to update status check description
           echo "$DBG"
@@ -76,8 +77,7 @@ jobs:
           if [[ ! "$PR_TITLE" =~ ^[A-Z]{2,5}-[0-9]{1,5}([[:space:]]|:) ]]
           then
             echo "NOT MATCHING"
-            upd "failure" "XXX" "YYY"
-            # upd "failure" "Failed" "The Pull Request title does not respect the expected format. E.g. ENG-1234 feature description"
+            upd "failure" "Failed" "The Pull Request title does not respect the expected format. E.g. ENG-1234 feature description"
             exit 1
           fi
 
@@ -87,9 +87,54 @@ jobs:
           PR_STORY_ID=$(echo "$PR_TITLE" | sed -E 's/([A-Z]{2,5}-[0-9]{1,5}).*/\1/')
           echo "PR_STORY_ID $PR_STORY_ID"
           echo "::set-output name=PR_STORY_ID::$PR_STORY_ID"
-#      # BOM
-#      - name: "BOM update"
-#        run: echo 'BOM updated'
+      # BOM
+      - name: "entando-core-bom update"
+        run: |
+
+          upd() {
+            curl "$URL" \
+              -X POST \
+              -H "Accept: application/json" \
+              -H 'authorization: Bearer ${{ secrets.TOKEN }}' \
+              -d "{\"state\":\"$1\", \"description\": \"$3\", \"context\":\"$2\"}" \
+            || true
+          }
+
+          # check for pom.xml existence
+          # TODO do we want to manage differently this check?
+          FILE="$REPO_FOLDER/pom.xml"
+          if [[ ! -f "$FILE" ]]; then
+              exit 0
+          fi
+
+          # fetch entando-core-bom tags
+          coreBomDir="entando-core-bom"
+          mkdir "$coreBomDir" && cd "$coreBomDir"
+          git init
+          git fetch --tag https://github.com/entando/entando-core-bom.git
+          # set version
+          # lastVersion=$( git tag -l | tail -1 | sed 's/^v\(.*\)/\1/')
+          lastVersion=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v\(.*\)/\1/')
+          cd .. && rm -rf "$coreBomDir"
+
+          # install xmlstarlet
+          sudo apt-get install xmlstarlet
+
+          # get entando-core-bom version
+          # check if bom exist in the current project pom file
+          # TODO reorganize: at least the bom presence check should be done at the beginning, blocking the fetch too
+          cd "$REPO_FOLDER"
+          echo "IN FOLDER"
+
+          bomVersion=$(xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t -v "/pom:project/pom:dependencyManagement/pom:dependencies/pom:dependency/pom:version" pom.xml)
+          echo "BOM $bomVersion"
+          echo "LAST_VERSION $lastVersion"
+          if [[ "" != "$bomVersion" && "$bomVersion" != "$lastVersion" ]]
+          then
+            echo "BOM VERSION OUT OF DATE"
+            upd "failure" "Failed" "The entando-core-bom version is not aligned with the last available version"
+            exit 1
+          fi
 #      # ADD LABEL PREPARED
 #      - name: "Add label prepared"
 #        uses: buildsville/add-remove-label@v1
