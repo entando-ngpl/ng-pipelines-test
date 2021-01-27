@@ -119,7 +119,7 @@ jobs:
           coreBomDir="entando-core-bom"
           mkdir "$coreBomDir" && cd "$coreBomDir"
           git init
-          git fetch --tag https://github.com/entando/entando-core-bom.git > /dev/null
+          git fetch --tag https://github.com/entando/entando-core-bom.git &> /dev/null
           # set version
           # lastVersion=$( git tag -l | tail -1 | sed 's/^v\(.*\)/\1/')
           lastVersion=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v\(.*\)/\1/')
@@ -133,11 +133,23 @@ jobs:
           # TODO reorganize: at least the bom presence check should be done at the beginning, blocking the fetch too
           cd "$REPO_FOLDER"
 
-          bomVersion=$(xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t -v "/pom:project/pom:dependencyManagement/pom:dependencies/pom:dependency/pom:version" pom.xml)
-          echo "BOM $bomVersion"
-          echo "LAST_VERSION $lastVersion"
-          if [[ "" != "$bomVersion" && "$bomVersion" != "$lastVersion" ]]
-          then
+          #          echo "BEFORE"
+          #          xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t -v "/pom:project/pom:dependencyManagement/pom:dependencies/pom:dependency/pom:version" pom.xml || true
+          #          echo "AFTER"
+
+          set -x
+
+          # get BOM version from pom.xml
+          bomVersion=$(xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t -v "/pom:project/pom:dependencyManagement/pom:dependencies/pom:dependency/pom:version" pom.xml) || true
+
+          echo "BOM VERSION IN pom.xml: $bomVersion"
+          echo "LAST_VERSION entando-core-bom AVAILABLE: $lastVersion"
+
+          # if the current project does not depends on entando-core-bom => exit OK
+          [ -z "$bomVersion" ] && echo "BOM dependency not found" && exit 0
+
+          # if the pom.xml entando-core-bom version is not aligned with the last available one => exit FAIL
+          if [[ "$bomVersion" != "$lastVersion" ]]; then
             echo "BOM VERSION OUT OF DATE"
             upd "failure" "Failed" "The entando-core-bom version is not aligned with the last available version"
             exit 1
