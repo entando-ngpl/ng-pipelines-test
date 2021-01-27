@@ -89,6 +89,8 @@ jobs:
           echo "::set-output name=PR_STORY_ID::$PR_STORY_ID"
       # BOM
       - name: "entando-core-bom update"
+        env:
+          LABELS: ${{ toJson(github.event.pull_request.labels) }}
         run: |
 
           upd() {
@@ -99,6 +101,12 @@ jobs:
               -d "{\"state\":\"$1\", \"description\": \"$3\", \"context\":\"$2\"}" \
             || true
           }
+
+          SKIP_BOM_CHECK_LABEL=$(jq -r '.[] | select(.name=="no-bom-check")' <<< $LABELS)
+          if [[ "" != "$SKIP_BOM_CHECK_LABEL" ]]; then
+            echo "Skipping BOM check"
+            exit 0
+          fi
 
           # check for pom.xml existence
           # TODO do we want to manage differently this check?
@@ -111,7 +119,7 @@ jobs:
           coreBomDir="entando-core-bom"
           mkdir "$coreBomDir" && cd "$coreBomDir"
           git init
-          git fetch --tag https://github.com/entando/entando-core-bom.git
+          git fetch --tag https://github.com/entando/entando-core-bom.git > /dev/null
           # set version
           # lastVersion=$( git tag -l | tail -1 | sed 's/^v\(.*\)/\1/')
           lastVersion=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v\(.*\)/\1/')
@@ -124,7 +132,6 @@ jobs:
           # check if bom exist in the current project pom file
           # TODO reorganize: at least the bom presence check should be done at the beginning, blocking the fetch too
           cd "$REPO_FOLDER"
-          echo "IN FOLDER"
 
           bomVersion=$(xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t -v "/pom:project/pom:dependencyManagement/pom:dependencies/pom:dependency/pom:version" pom.xml)
           echo "BOM $bomVersion"
