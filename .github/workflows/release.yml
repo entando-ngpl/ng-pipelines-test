@@ -7,10 +7,10 @@ on:
 #    tags:
 #      - 'v*'
   release:
-#    types:
+    types:
 #      - published
 #      - unpublished
-#      - created
+      - created
 #      - edited
 #      - deleted
 #      - prereleased
