@@ -2,6 +2,8 @@ name: Publish to Entando Nexus
 
 on:
   push:
+    branches:
+      - "rel_v*"
     tags:
       - 'v*'
 #  release:
