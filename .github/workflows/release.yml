@@ -24,7 +24,8 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
-      - uses: actions/checkout@v2
+      - name: "Checkout"
+        uses: actions/checkout@v2
       - name: Set up Entando Nexus Repository
         uses: actions/setup-java@v1
         with:
