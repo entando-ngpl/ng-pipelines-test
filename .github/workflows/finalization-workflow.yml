@@ -32,11 +32,11 @@ jobs:
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
           # fetch tags
-          git fetch --tag
+          git fetch --tag &> /dev/null
           # set version
           # TODO switch next 2 lines and check that the new solution works. the first returns a text ordered list (not numeric)
-          lastTag=$( git tag -l | tail -1 )
-          # lastTag=$(git describe --tags $(git rev-list --tags --max-count=1))
+          # lastTag=$( git tag -l | tail -1 )
+          lastTag=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v\(.*\)/\1/')
           IFS='.' read -r X Y Z <<< "$lastTag"
           X="${X//v/}"    # tag version to pom version
           Z=$((Z+1))

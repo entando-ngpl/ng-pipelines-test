@@ -6,7 +6,7 @@
     <artifactId>ng-pipelines</artifactId>
     <groupId>org.entando.entando</groupId>
     <version>6.2.0-SNAPSHOT</version>
-    <packaging>war</packaging>
+<!--    <packaging>war</packaging>-->
     <name>Entando Ng Pipelins</name>
     <description>Github Actions Test</description>
 
