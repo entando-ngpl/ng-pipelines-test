@@ -1,7 +1,12 @@
 name: Publish package to the Entando Nexus Repository
+
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - v*
+#  release:
+#    types: [created]
+
 jobs:
   publish:
     runs-on: ubuntu-latest
