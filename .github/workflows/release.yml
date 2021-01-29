@@ -1,18 +1,18 @@
-name: Publish package to the Entando Nexus Repository
+name: Publish to Entando Nexus
 
 on:
-#  push:
-#    tags:
-#      - v*
-  release:
-    types:
-      - published
-      - unpublished
-      - created
-      - edited
-      - deleted
-      - prereleased
-      - released
+  push:
+    tags:
+      - 'v*'
+#  release:
+#    types:
+#      - published
+#      - unpublished
+#      - created
+#      - edited
+#      - deleted
+#      - prereleased
+#      - released
 
 jobs:
   publish:
