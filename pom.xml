@@ -5,8 +5,8 @@
 
     <artifactId>ng-pipelines</artifactId>
     <groupId>org.entando.entando</groupId>
-    <version>9.9.9</version>
-<!--    <packaging>war</packaging>-->
+    <version>7.7.7</version>
+    <packaging>jar</packaging>
     <name>Entando Ng Pipelins</name>
     <description>Github Actions Test</description>
 
@@ -16,6 +16,7 @@
     </properties>
 
     <build>
+        <finalName>NP_PIPELINE_MANUAL</finalName>
         <plugins>
 
             <plugin>
@@ -24,21 +25,21 @@
                 <version>2.8.2</version>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <tagNameFormat>v@{project.version}</tagNameFormat>
-                    <pushChanges>false</pushChanges>
-                    <localCheckout>true</localCheckout>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-release-plugin</artifactId>-->
+<!--                <version>2.3.2</version>-->
+<!--                <configuration>-->
+<!--                    <tagNameFormat>v@{project.version}</tagNameFormat>-->
+<!--                    <pushChanges>false</pushChanges>-->
+<!--                    <localCheckout>true</localCheckout>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-jar-plugin</artifactId>-->
+<!--            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -50,7 +51,7 @@
 
     <repositories>
         <repository>
-            <id>nexus-jx</id>
+            <id>jx-releases</id>
             <url>https://nexus-jx.apps.serv.run/repository/maven-releases/</url>
             <releases>
                 <enabled>true</enabled>
