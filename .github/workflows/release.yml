@@ -46,7 +46,7 @@ jobs:
         run: |
           echo "##### TAG NAME $TAG_NAME"
 
-          tagValue=$( echo "$TAG_NAME" | sed 's/^v\(.*\)/\1/') )
+          tagValue=$( echo "$TAG_NAME" | sed 's/^v\(.*\)/\1/' )
           echo "##### TAG VALUE $tagValue"
 
           # get the current artifact version in the entando-core-bom pom.xml file
@@ -64,14 +64,14 @@ jobs:
           sudo apt-get install xmlstarlet
 
           # get the current artifact version in the entando-core-bom pom.xml file
-          artifactVersion=$(xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t \
+          artifactVersionInBom=$(xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t \
             -m "/pom:project/pom:properties" \
             -v "./pom:$artifactId.version" pom.xml)
 
-          echo "##### ARTIFACT VERSION $artifactVersion"
+          echo "##### ARTIFACT VERSION $artifactVersionInBom"
 
           # if the current project is a dependendcy of entando-core-bom => exit OK
-          [ -z "$artifactVersion" ] && echo "Dependency int the entando-core-bom not found" && exit 0
+          [ -z "$artifactVersionInBom" ] && echo "Dependency int the entando-core-bom not found" && exit 0
 
           # update the version of the current project in the entando-core-bom pom.xml file
           xmlstarlet ed -P -N pom=http://maven.apache.org/POM/4.0.0 \
