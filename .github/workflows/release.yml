@@ -1,15 +1,15 @@
 name: Publish to Entando Nexus
 
 on:
-#  push:
-#    branches:
-#      - "rel_v*"
-#    tags:
-#      - 'v*'
+  #  push:
+  #    branches:
+  #      - "rel_v*"
+  #    tags:
+  #      - 'v*'
   release:
     types:
-#      - published
-#      - unpublished
+      #      - published
+      #      - unpublished
       - created
 #      - edited
 #      - deleted
@@ -42,9 +42,12 @@ jobs:
       - name: "Update entando-core-bom"
         env:
           ENTANDO_CORE_BOM_FOLDER: "entando-core-bom"
-          TAG_NAME: ${{ github.event.release.tag_name | sed 's/^v\(.*\)/\1/') }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
           echo "##### TAG NAME $TAG_NAME"
+
+          tagValue=$( echo "$TAG_NAME" | sed 's/^v\(.*\)/\1/') )
+          echo "##### TAG VALUE $tagValue"
 
           # get the current artifact version in the entando-core-bom pom.xml file
           artifactId=$(xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t \
