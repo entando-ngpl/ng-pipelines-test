@@ -26,23 +26,56 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
       - name: "Checkout"
         uses: actions/checkout@v2
-      - name: Set up Entando Nexus Repository
+      - name: "Set up Entando Nexus Repository"
         uses: actions/setup-java@v1
         with:
           java-version: 11
           server-id: ng-pipelines
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-      - name: Publish package
+      - name: "Publish package"
         run: |
-          echo "### MAVEN_USERNAME $MAVEN_USERNAME"
-          echo "### MAVEN_PASSWORD $MAVEN_PASSWORD"
-          ls ~
-          ls ~/.m2
-          cat ~/.m2/settings.xml
-          env
-          echo "---------------------------------------------"
           mvn --batch-mode deploy -X
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      - name: "Update entando-core-bom"
+        env:
+          ENTANDO_CORE_BOM_FOLDER: "entando-core-bom"
+          TAG_NAME: ${{ github.event.release.tag_name | sed 's/^v\(.*\)/\1/') }}
+        run: |
+          echo "##### TAG NAME $TAG_NAME"
+
+          # get the current artifact version in the entando-core-bom pom.xml file
+          artifactId=$(xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t \
+            -m "/pom:project" \
+            -v "./pom:artifactId" pom.xml)
+
+          echo "##### ARTIFACT ID $artifactId"
+
+          # clone entando-core-bom
+          take "$ENTANDO_CORE_BOM_FOLDER"
+          git clone https://github.com/entando-ngpl/entando-core-bom.git
+
+          # install xmlstarlet
+          sudo apt-get install xmlstarlet
+
+          # get the current artifact version in the entando-core-bom pom.xml file
+          artifactVersion=$(xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t \
+            -m "/pom:project/pom:properties" \
+            -v "./pom:$artifactId.version" pom.xml)
+
+          echo "##### ARTIFACT VERSION $artifactVersion"
+
+          # if the current project is a dependendcy of entando-core-bom => exit OK
+          [ -z "$artifactVersion" ] && echo "Dependency int the entando-core-bom not found" && exit 0
+
+          # update the version of the current project in the entando-core-bom pom.xml file
+          xmlstarlet ed -P -N pom=http://maven.apache.org/POM/4.0.0 \
+              --update "/pom:project/pom:properties/pom:$artifactId.version" \
+              -v "$TAG_NAME" pom.xml > pom.xml
+
+          # commit
+          git add .
+          git commit -m "Bumped $artifactId to $TAG_NAME"
+          git push

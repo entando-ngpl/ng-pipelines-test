@@ -33,6 +33,7 @@ jobs:
           git config --global user.name "firegloves"
           # fetch tags
           git fetch --tag &> /dev/null
+
           # set version
           # TODO switch next 2 lines and check that the new solution works. the first returns a text ordered list (not numeric)
           # lastTag=$( git tag -l | tail -1 )
@@ -42,30 +43,29 @@ jobs:
           Z=$((Z+1))
           mvn versions:set -DnewVersion="$X.$Y.$Z" > "$TMPDIR/mvn-version.log"
           echo "Version updated"
+
           # compile
           mvn compile > "$TMPDIR/mvn-compile.log" || {
             cat "$TMPDIR/mvn-compile.log"
             exit $FILENO
           }
+
           # checkout milestones branch
           BRANCH_NAME="rel_v$X.$Y.$Z"
           git checkout -b "$BRANCH_NAME"
+
           # commit
           git add .
           git commit -m "v$X.$Y.$Z"
+
           # tag
           git tag "v$X.$Y.$Z"
+
           # push
           git push --set-upstream origin "$BRANCH_NAME" --force
           git push --tags
+
           # delete branches
           git checkout main
           git push -d origin "$BRANCH_NAME"
           git branch -D "$BRANCH_NAME"
-
-      - name: "Build final artifact"
-        run: |
-          echo "Build final artifact"
-      - name: "Publish final artifact"
-        run: |
-          echo "Publish final artifact"
