@@ -43,6 +43,7 @@ jobs:
           ENTANDO_CORE_BOM_REPO_URL: "https://github.com/entando-ngpl/entando-core-bom.git"
           TAG_NAME: ${{ github.event.release.tag_name }}
           TOKEN_SECRET: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         run: |
           echo "TAG NAME $TAG_NAME"
 
