@@ -52,10 +52,10 @@ jobs:
           TAG_NAME: ${{ github.event.release.tag_name }}
           TOKEN_SECRET: ${{ secrets.TOKEN }}
         run: |
-          echo "##### TAG NAME $TAG_NAME"
+          echo "TAG NAME $TAG_NAME"
 
           tagValue=$(echo "$TAG_NAME" | sed 's/^v\(.*\)/\1/')
-          echo "##### TAG VALUE $tagValue"
+          echo "TAG VALUE $tagValue"
 
           # install xmlstarlet
           sudo apt-get install xmlstarlet &> /dev/null
@@ -73,14 +73,12 @@ jobs:
           authUrl=$(echo "$ENTANDO_CORE_BOM_REPO_URL" | sed "s|://|://$TOKEN_SECRET@|")
           git clone "$authUrl" .
 
-          ls -l
-
           # get the current artifact version in the entando-core-bom pom.xml file
           artifactVersionInBom=$(xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t \
             -m "/pom:project/pom:properties" \
             -v "./pom:$artifactId.version" pom.xml) || true
 
-          echo "##### ARTIFACT VERSION $artifactVersionInBom"
+          echo "ARTIFACT VERSION $artifactVersionInBom"
 
           # if the current project is a dependendcy of entando-core-bom => exit OK
           [ -z "$artifactVersionInBom" ] && echo "Dependency int the entando-core-bom not found" && exit 0
@@ -99,4 +97,3 @@ jobs:
           git add pom.xml
           git commit -m "Bumped $artifactId to $tagValue"
           git push
-          echo "PUSHED"
