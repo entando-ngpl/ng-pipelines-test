@@ -87,6 +87,8 @@ jobs:
           git config --global user.name ${{ secrets.GIT_USER_NAME }}
 
           # commit
+          echo "PRE ADD"
+          git add pom.xml
           echo "PRE COMMIT"
           git commit -m "Bumped $artifactId to $tagValue"
           echo "PRE PUSH"
