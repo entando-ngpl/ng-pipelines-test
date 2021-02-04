@@ -35,10 +35,11 @@ jobs:
         env:
           TMPDIR: "/home/runner/work/_temp"
           TOKEN: ${{ secrets.ENTANDO_NGPL_SECRET }}
+          REMOTE_URL: ${{ github.event.repository.clone_url }}
         run: |
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
-          git config user.password ${TOKEN}
+#          git config --global user.password ${TOKEN}
 
           # fetch tags
           git fetch --tag &> /dev/null
@@ -69,6 +70,9 @@ jobs:
 
           # tag
           git tag "v$X.$Y.$Z"
+
+          authUrl=$(echo "$REMOTE_URL" | sed "s|://|://$TOKEN@|")
+          git remote set-url origin "$authUrl"
 
           # push
           git push --set-upstream origin "$BRANCH_NAME" --force
