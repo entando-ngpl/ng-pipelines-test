@@ -34,9 +34,12 @@ jobs:
       - name: "Derive and set version"
         env:
           TMPDIR: "/home/runner/work/_temp"
+          TOKEN: ${{ secrets.ENTANDO_NGPL_SECRET }}
         run: |
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
+          git config user.password ${TOKEN}
+
           # fetch tags
           git fetch --tag &> /dev/null
 
