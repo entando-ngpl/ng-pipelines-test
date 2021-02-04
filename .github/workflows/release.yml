@@ -1,20 +1,12 @@
 name: Publish to Entando Nexus
 
 on:
-  #  push:
-  #    branches:
-  #      - "rel_v*"
-  #    tags:
-  #      - 'v*'
-  release:
-    types:
-      #      - published
-      #      - unpublished
-      - created
-#      - edited
-#      - deleted
-#      - prereleased
-#      - released
+  push:
+    tags:
+      - '*'
+#  release:
+#    types:
+#      - created
 
 jobs:
   publish:
