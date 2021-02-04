@@ -88,7 +88,7 @@ jobs:
           echo "PR_STORY_ID $PR_STORY_ID"
           echo "::set-output name=PR_STORY_ID::$PR_STORY_ID"
       # BOM
-      - name: "entando-core-bom update"
+      - name: "entando-core-bom check"
         env:
           LABELS: ${{ toJson(github.event.pull_request.labels) }}
         run: |
@@ -181,20 +181,18 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Cache SonarCloud packages
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
       - name: Cache Maven packages
-        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
       - name: Build and analyze
         if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
         env:
@@ -235,17 +233,23 @@ jobs:
           SKIP_LABEL=$(jq '.[] | select(.name=="no-test")' <<< $LABELS)
           if [ -z "$SKIP_LABEL" ]; then EXECUTE_STEP=true; else EXECUTE_STEP=false; fi
           echo "::set-output name=EXECUTE_STEP::$EXECUTE_STEP"
-#      - name: "Checkout"
-#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-#        uses: actions/checkout@v2
-#      - name: Set up JDK 1.1
-#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-#        uses: actions/setup-java@v1
-#        with:
-#          java-version: 11
-#      - name: Run tests with Maven
-#        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
-#        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
+      - name: "Checkout"
+        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+        uses: actions/checkout@v2
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Set up JDK 1.1
+        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Run tests with Maven
+        if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
+        run: mvn -B test -Dgroups=${{ matrix.mvn-test-group }}
       - name: "Remove NO-TEST label"
         if: steps.skip-label-check.outputs.EXECUTE_STEP != 'true' && matrix.remove-label
         uses: buildsville/add-remove-label@v1
@@ -266,6 +270,12 @@ jobs:
           SKIP_LABEL=$(jq '.[] | select(.name=="no-owasp")' <<< $LABELS)
           if [ -z "$SKIP_LABEL" ]; then EXECUTE_STEP=true; else EXECUTE_STEP=false; fi
           echo "::set-output name=EXECUTE_STEP::$EXECUTE_STEP"
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
       - name: "OWASP checks"
         if: steps.skip-label-check.outputs.EXECUTE_STEP == 'true'
         run: |
