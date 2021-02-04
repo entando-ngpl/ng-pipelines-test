@@ -72,6 +72,7 @@ jobs:
           git tag "v$X.$Y.$Z"
 
           authUrl=$(echo "$REMOTE_URL" | sed "s|://|://$TOKEN@|")
+          echo "AUTH_URL $authUrl"
           git remote set-url origin "$authUrl"
 
           # push
