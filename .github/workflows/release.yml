@@ -46,7 +46,7 @@ jobs:
         run: |
           echo "##### TAG NAME $TAG_NAME"
 
-          tagValue=$( echo "$TAG_NAME" | sed 's/^v\(.*\)/\1/' )
+          tagValue=$(echo "$TAG_NAME" | sed 's/^v\(.*\)/\1/')
           echo "##### TAG VALUE $tagValue"
 
           # install xmlstarlet
@@ -63,6 +63,8 @@ jobs:
           mkdir "$ENTANDO_CORE_BOM_FOLDER" && cd "$ENTANDO_CORE_BOM_FOLDER"
           git clone https://github.com/entando-ngpl/entando-core-bom.git
 
+          ls -l
+
           # get the current artifact version in the entando-core-bom pom.xml file
           artifactVersionInBom=$(xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t \
             -m "/pom:project/pom:properties" \
@@ -76,7 +78,9 @@ jobs:
           # update the version of the current project in the entando-core-bom pom.xml file
           xmlstarlet ed -P -N pom=http://maven.apache.org/POM/4.0.0 \
               --update "/pom:project/pom:properties/pom:$artifactId.version" \
-              -v "$TAG_NAME" pom.xml > pom.xml
+              -v "$tagValue" pom.xml > pom.xml
+
+          cat pom.xml
 
           # commit
           git add .
