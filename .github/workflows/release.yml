@@ -50,7 +50,8 @@ jobs:
           echo "##### TAG VALUE $tagValue"
 
           # install xmlstarlet
-          sudo apt-get install xmlstarlet
+          sudo apt-get install xmlstarlet &> /dev/null
+          echo "xmlstarlet installed"
 
           # get the current artifact version in the entando-core-bom pom.xml file
           artifactId=$(xmlstarlet sel -N pom="http://maven.apache.org/POM/4.0.0" -t \
@@ -74,6 +75,9 @@ jobs:
 
           # if the current project is a dependendcy of entando-core-bom => exit OK
           [ -z "$artifactVersionInBom" ] && echo "Dependency int the entando-core-bom not found" && exit 0
+
+          echo "UPDATING entando-core-bom pom.xml file..."
+          cat pom.xml
 
           # update the version of the current project in the entando-core-bom pom.xml file
           xmlstarlet ed -P -N pom=http://maven.apache.org/POM/4.0.0 \
