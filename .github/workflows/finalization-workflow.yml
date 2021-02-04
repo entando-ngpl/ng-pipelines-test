@@ -21,6 +21,8 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
       - name: "Checkout"
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ENTANDO_NGPL_SECRET }}
       - name: Cache Maven packages
         uses: actions/cache@v2
         with:
@@ -34,8 +36,6 @@ jobs:
       - name: "Derive and set version"
         env:
           TMPDIR: "/home/runner/work/_temp"
-          TOKEN: ${{ secrets.ENTANDO_NGPL_SECRET }}
-          REMOTE_URL: ${{ github.event.repository.clone_url }}
         run: |
           git config --global user.email "cicd@entando.com"
           git config --global user.name "firegloves"
@@ -70,10 +70,6 @@ jobs:
 
           # tag
           git tag "v$X.$Y.$Z"
-
-          authUrl=$(echo "$REMOTE_URL" | sed "s|://|://$TOKEN@|")
-          echo "AUTH_URL $authUrl"
-          git remote set-url origin "$authUrl"
 
           # push
           git push --set-upstream origin "$BRANCH_NAME" --force
