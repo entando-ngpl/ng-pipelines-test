@@ -89,8 +89,14 @@ jobs:
 
           echo "::set-output name=TAG_VALUE::$tagValue"
           echo "::set-output name=ARTIFACT_ID::$artifactId"
+
+          # if a Dockerfile is present => dockerization step is needed
+          # TODO move this code to a starting step responsible to configure the entire workflow?
+          if ls ./Dockerfile* 1> /dev/null 2>&1; then
+              echo "::set-output name=DOCKERIZATION_NEEDED::true"
+          fi
       - name: "Dockerization"
-        if: ${{ secrets.DOCKER_GENERATION }}
+        if: steps.entando-core-bom-update.outputs.DOCKERIZATION_NEEDED == 'true'
         env:
           DOCKER_HOST: ${{ secrets.DOCKER_HOST }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
