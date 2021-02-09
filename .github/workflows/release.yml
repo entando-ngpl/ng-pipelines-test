@@ -35,6 +35,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
       - name: "Update entando-core-bom"
+        id: entando-core-bom-update
         env:
           ENTANDO_CORE_BOM_FOLDER: "entando-core-bom"
           ENTANDO_CORE_BOM_REPO_URL: "https://github.com/entando-ngpl/entando-core-bom.git"
@@ -71,6 +72,8 @@ jobs:
 
           echo "UPDATING entando-core-bom pom.xml file..."
 
+          # TODO check if new version is newer?
+
           # update the version of the current project in the entando-core-bom pom.xml file
           xmlstarlet ed --inplace -P -N pom=http://maven.apache.org/POM/4.0.0 \
               --update "/pom:project/pom:properties/pom:$artifactId.version" \
@@ -83,3 +86,24 @@ jobs:
           git add pom.xml
           git commit -m "Bumped $artifactId to $tagValue"
           git push
+
+          echo "::set-output name=TAG_VALUE::$tagValue"
+          echo "::set-output name=ARTIFACT_ID::$artifactId"
+      - name: "Dockerization"
+        if: ${{ secrets.DOCKER_GENERATION }}
+        env:
+          DOCKER_HOST: ${{ secrets.DOCKER_HOST }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          IMAGE_NAME: ${{ steps.entando-core-bom-update.outputs.ARTIFACT_ID }}
+          IMAGE_VERSION: ${{ steps.entando-core-bom-update.outputs.TAG_VALUE }}
+        run: |
+          docker login -u "$DOCKER_USERNAME" -p "DOCKER_PASSWORD" "$DOCKER_HOST"
+
+          # eap
+          imageTag="$DOCKER_USERNAME/$IMAGE_NAME-eap:$IMAGE_VERSION"
+          mvn clean package && docker build . --no-cache -t "$imageTag" -f Dockerfile.eap && docker push "$imageTag"
+
+          # widlfly
+          imageTag="$DOCKER_USERNAME/$IMAGE_NAME-wildfly:$IMAGE_VERSION"
+          mvn clean package && docker build . --no-cache -t "$imageTag" -f Dockerfile.wildfly && docker push "$imageTag"
