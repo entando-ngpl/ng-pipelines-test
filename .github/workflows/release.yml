@@ -116,6 +116,6 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.set-docker-image-tag.outputs.DOCKER_IMAGE }}
+          tags: ${{ steps.check-dockerization-needed.outputs.DOCKER_IMAGE }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
