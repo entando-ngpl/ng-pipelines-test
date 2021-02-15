@@ -11,9 +11,6 @@ on:
       - reopened
     branches:
       - main
-  push:
-    branches:
-      - "*"
 
 jobs:
   # PREPARE
@@ -25,7 +22,7 @@ jobs:
       SHA: ${{ github.sha }}
       URLT: ${{ github.event.repository.statuses_url }}
       REPO_NAME: ${{ github.event.repository.name }}
-      UPLOAD_ARTIFACT_NAME: $REPO_NAME-artifact
+      UPLOAD_ARTIFACT_NAME: "$REPO_NAME-artifact"
     runs-on: ubuntu-latest
     steps:
       - name: Dump GitHub context
@@ -43,6 +40,9 @@ jobs:
         env:
           TOKEN_SECRET: ${{ secrets.NGPL_TOKEN }}
         run: |
+
+          echo "UPLOAD_ARTIFACT_NAME $UPLOAD_ARTIFACT_NAME"
+
           authUrl=$(echo "$CLONE_URL" | sed "s|://|://$TOKEN_SECRET@|")
           git clone "$authUrl" "$REPO_FOLDER"
           cd "$REPO_FOLDER"
