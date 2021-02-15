@@ -11,6 +11,9 @@ on:
       - reopened
     branches:
       - main
+  puhs:
+    branches:
+      - main
 
 jobs:
   # PREPARE
@@ -21,6 +24,8 @@ jobs:
       REPO_FOLDER: repo_folder
       SHA: ${{ github.sha }}
       URLT: ${{ github.event.repository.statuses_url }}
+      REPO_NAME: ${{ github.event.repository.name }}
+      UPLOAD_ARTIFACT_NAME: $REPO_NAME-artifact
     runs-on: ubuntu-latest
     steps:
       - name: Dump GitHub context
