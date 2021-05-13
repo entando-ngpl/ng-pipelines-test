@@ -1,0 +1,42 @@
+# This workflow will prepare every thing required to proceed with a PR
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - rationalisation-test
+jobs:
+  # test
+  rationalisation-test:
+    env:
+      CLONE_URL: ${{ github.event.pull_request.base.repo.clone_url }}
+      BRANCH_NAME: ${{ github.head_ref }}
+      REPO_FOLDER: repo_folder
+#      SHA: ${{ github.sha }}
+#      URLT: ${{ github.event.repository.statuses_url }}
+      REPO_NAME: ${{ github.event.repository.name }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      # CHECKOUT
+      - uses: actions/checkout@v2
+      - name: "TEST"
+        run: |
+          echo "### BEFORE LS ###"
+          ls rationalised
+          echo "### AFTER LS ###"
+          source rationalised/functions.sh
+          setGitCredentials ${{ secrets.GIT_USER_EMAIL }} ${{ secrets.GIT_USER_NAME }}
+
+#          git config --global user.email "cicd@entando.com"
+#          git config --global user.name "firegloves"
+
+
+#          git config pull.rebase false
+#          git checkout "$BRANCH_NAME"
+#          git pull
