@@ -1,0 +1,13 @@
+name: Release
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  dosomething:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        run: echo "DOOOOOOOOOONE"
